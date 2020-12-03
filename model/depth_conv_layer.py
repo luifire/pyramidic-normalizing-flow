@@ -6,7 +6,7 @@ from misc.misc import *
 from misc.constants import *
 # BIAS
 
-class NFConvLayer(nn.Module):
+class DepthConv(nn.Module):
     """  """
     def __init__(self, kernel_size):
         super().__init__()
@@ -16,8 +16,7 @@ class NFConvLayer(nn.Module):
         # 1.5 kind of suggested by IFA-VAE
         weights = torch.normal(mean=1.5, std=0.5, size=[self.kernel_size_sq, self.kernel_size_sq], device=DEVICE)
 
-        printt("init weights", weights)
-        print(weights.shape)
+        #printt("init weights", weights)
         self.weights = nn.Parameter(weights, requires_grad=True)  # nn.Parameter is a Tensor that's a module parameter.
         #bias = torch.Tensor(size_out)
         #self.bias = nn.Parameter(bias)
@@ -25,43 +24,63 @@ class NFConvLayer(nn.Module):
     def _prepare_weight_matrix_and_norm(self):
         # make triangular matrix
         # printt("forward 1. weights", self.weights)
+        printt("device", self.weights.device)
+
         weights = torch.triu(self.weights)
 
         diag = torch.diagonal(weights)
-        printt("diag", diag)
+        #printt("diag", diag)
         normal_diag_matrix = torch.diag_embed(diag)
-        printt("normal_diag_matrix", normal_diag_matrix)
+        #printt("normal_diag_matrix", normal_diag_matrix)
 
         zero_diag_matrix = weights - normal_diag_matrix
-        print("zero_diag_matrix", zero_diag_matrix)
+        #print("zero_diag_matrix", zero_diag_matrix)
 
         # exp(diag)+1
         exped_diag = torch.exp(diag) + 1
         # printt("exped_diag", exped_diag)
         conv_matrix = zero_diag_matrix + torch.diag_embed(exped_diag)
-        printt("conv_matrix", conv_matrix)
+        #printt("conv_matrix", conv_matrix)
 
         # printt("x", x.shape)
         conv_matrix = conv_matrix.unsqueeze(0).unsqueeze(0)
-        printt("conv_matrix", conv_matrix.shape)
+        #printt("conv_matrix", conv_matrix.shape)
 
-        norm = torch.prod(exped_diag)
-
+        norm = torch.prod(exped_diag).abs()
+        printt("dev ende", conv_matrix.device)
         return conv_matrix, norm
 
     def forward(self, x : torch.Tensor):
 
         conv_matrix, norm = self._prepare_weight_matrix_and_norm()
 
-        batch_shape = x.shape
-        batch_size = batch_shape[0]
-        channel_count = batch_shape[1]
-        height = batch_shape[HEIGHT_DIM]
-        width = batch_shape[WIDTH_DIM]
+        print_shape("x", x)
+        #batch_size, channel_count, height, width = x.shape
 
-        assert width % KERNEL_SIZE == 0
-        assert height % KERNEL_SIZE == 0
+        permuted = x.permute(*(0, 2, 3, 1))
+        printt("x", x.device)
 
+        warn("this might not walk and hasn't been checked!!!")
+        x = permuted.matmul(conv_matrix)
+        x = x.permute(0, 3, 1, 2)
+
+        return x * norm
+
+
+class DepthConvBundl(nn.Module):
+
+    def __init__(self, kernel_size=KERNEL_SIZE, bundle_count=KERNEL_SIZE):
+        super().__init__()
+        self.bundle = []
+        for i in range(bundle_count):
+            self.bundle.append(DepthConv(kernel_size))
+
+    def __call__(self, x):
+        for conv in self.bundle:
+            x = conv(x)
+        return x
+
+        """"
         # x.shape == batch, channel, width, height
         # do the convolution myself
         # first to the right and then down
@@ -93,7 +112,7 @@ class NFConvLayer(nn.Module):
         #printt("sum", a.sum())
         # amount of convs fits
 
-        new_x = new_x / norm
+        new_x = new_x * norm
         return new_x
         #exit(1)
 
@@ -108,3 +127,5 @@ class NFConvLayer(nn.Module):
         #print(y.requires_grad)
         #return y
         return None
+        """
+

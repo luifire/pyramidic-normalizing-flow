@@ -5,7 +5,7 @@ from torchvision import datasets, transforms
 import torch.nn.functional as F
 import torch.optim as optim
 
-from model.pyramid_flow import PyramidFlow
+from model.pyramid_flow_model import PyramidFlowModel
 
 from misc.misc import *
 from misc.constants import *
@@ -24,25 +24,26 @@ torch.backends.cudnn.deterministic = True
 random_seed = 1
 torch.manual_seed(random_seed)
 
-train_loader = torch.utils.data.DataLoader(
-  torchvision.datasets.MNIST('/files/', train=True, download=True,
-                             transform=torchvision.transforms.Compose([
+transformation = torchvision.transforms.Compose([
                                torchvision.transforms.ToTensor(),
+                                #left, top, right and bottom
+                                # for MNIST
+                               torchvision.transforms.Pad([0,0,2,2], padding_mode='edge'),
                                torchvision.transforms.Normalize(
                                  (0.1307,), (0.3081,))
-                             ])),
+                             ])
+
+train_loader = torch.utils.data.DataLoader(
+  torchvision.datasets.MNIST('/files/', train=True, download=True,
+                             transform=transformation),
   batch_size=batch_size_train, shuffle=True)
 
 test_loader = torch.utils.data.DataLoader(
   torchvision.datasets.MNIST('/files/', train=False, download=True,
-                             transform=torchvision.transforms.Compose([
-                               torchvision.transforms.ToTensor(),
-                               torchvision.transforms.Normalize(
-                                 (0.1307,), (0.3081,))
-                             ])),
+                             transform=transformation),
   batch_size=batch_size_test, shuffle=True)
 
-network = PyramidFlow()
+network = PyramidFlowModel()
 optimizer = optim.SGD(network.parameters(), lr=learning_rate,
                       momentum=momentum)
 
@@ -51,11 +52,13 @@ train_counter = []
 test_losses = []
 test_counter = [i*len(train_loader.dataset) for i in range(n_epochs + 1)]
 
+"""
 def cut_data(data):
   #printt("list", list(data.shape))
   #at = list(data.shape)[2] % KERNEL_SIZE
   at = data.shape[2] % KERNEL_SIZE
   return data[:, :, at:, at:]
+"""
 
 def train(epoch):
   network.train()
@@ -63,10 +66,7 @@ def train(epoch):
     data = data.to(DEVICE)
     target = target.to(DEVICE)
 
-    printt("data", data.shape)
-
-    data = cut_data(data)
-    printt("data", data.shape)
+    print_shape("data", data)
 
     optimizer.zero_grad()
 
