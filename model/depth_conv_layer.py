@@ -6,7 +6,9 @@ from misc.misc import *
 from misc.constants import *
 # BIAS
 
+
 class DepthConv(nn.Module):
+
     """  """
     def __init__(self, kernel_size):
         super().__init__()
@@ -17,6 +19,7 @@ class DepthConv(nn.Module):
         weights = torch.normal(mean=1.5, std=0.5, size=[self.kernel_size_sq, self.kernel_size_sq], device=DEVICE)
 
         #printt("init weights", weights)
+
         self.weights = nn.Parameter(weights, requires_grad=True)  # nn.Parameter is a Tensor that's a module parameter.
         #bias = torch.Tensor(size_out)
         #self.bias = nn.Parameter(bias)
@@ -69,10 +72,10 @@ class DepthConv(nn.Module):
 
 class DepthConvBundl(nn.Module):
 
-    def __init__(self, kernel_size=KERNEL_SIZE, bundle_count=KERNEL_SIZE):
+    def __init__(self, kernel_size=KERNEL_SIZE, bundle_count=KERNEL_SIZE_SQ):
         super().__init__()
-        self.bundle = []
-        for i in range(bundle_count):
+        self.bundle = nn.ModuleList()
+        for _ in range(bundle_count):
             self.bundle.append(DepthConv(kernel_size))
 
     def __call__(self, x):

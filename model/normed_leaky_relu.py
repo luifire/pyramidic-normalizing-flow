@@ -23,10 +23,10 @@ class NormedLeakyRelu():
         bigger_zero = x > 0
         pos_counts = bigger_zero.sum(3).sum(2)
         neg_count = h*w - pos_counts
-        print("alpha to tensor")
+        print("alpha to tensor?")
         norm = self.alpha ** neg_count
 
-        print("dat klappt so auch nicht")
+        print("dat klappt so noch nicht, da musste die entsprechenden Bilder anschauen")
         return x * norm
 
 
