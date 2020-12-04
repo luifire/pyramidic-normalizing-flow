@@ -6,7 +6,6 @@ from misc.misc import *
 from misc.constants import *
 # BIAS
 
-
 class DepthConv(nn.Module):
 
     """  """
@@ -27,11 +26,12 @@ class DepthConv(nn.Module):
     def _prepare_weight_matrix_and_norm(self):
         # make triangular matrix
         # printt("forward 1. weights", self.weights)
-        printt("device", self.weights.device)
+        #printt("device", self.weights.device)
 
         weights = torch.triu(self.weights)
 
         diag = torch.diagonal(weights)
+        #printt("weights", diag)
         #printt("diag", diag)
         normal_diag_matrix = torch.diag_embed(diag)
         #printt("normal_diag_matrix", normal_diag_matrix)
@@ -40,48 +40,85 @@ class DepthConv(nn.Module):
         #print("zero_diag_matrix", zero_diag_matrix)
 
         # exp(diag)+1
-        exped_diag = torch.exp(diag) + 1
+        #exped_diag = torch.exp(diag) + 1
+        warn("currently, diag could become 0")
+        exped_diag = diag
         # printt("exped_diag", exped_diag)
         conv_matrix = zero_diag_matrix + torch.diag_embed(exped_diag)
         #printt("conv_matrix", conv_matrix)
 
         # printt("x", x.shape)
-        conv_matrix = conv_matrix.unsqueeze(0).unsqueeze(0)
+        conv_matrix = conv_matrix#.unsqueeze(0).unsqueeze(0)
         #printt("conv_matrix", conv_matrix.shape)
 
-        norm = torch.prod(exped_diag).abs()
-        printt("dev ende", conv_matrix.device)
-        return conv_matrix, norm
+        det = torch.prod(exped_diag)
+
+        if torch.isnan(det).any():
+            print("asdf")
+
+        assert det.item() != 0
+        #printt("det", det.item())
+        #printt("dev ende", conv_matrix.device)
+
+        return conv_matrix, det
 
     def forward(self, x : torch.Tensor):
 
-        conv_matrix, norm = self._prepare_weight_matrix_and_norm()
+        conv_matrix, det = self._prepare_weight_matrix_and_norm()
 
-        print_shape("x", x)
-        #batch_size, channel_count, height, width = x.shape
+        #print_shape("x", x)
+        _, _, height, width = x.shape
 
         permuted = x.permute(*(0, 2, 3, 1))
-        printt("x", x.device)
 
-        warn("this might not walk and hasn't been checked!!!")
+        warn("achtung beim splitten! [0] bekommt die wenigste info und [8] die meiste!!!")
         x = permuted.matmul(conv_matrix)
         x = x.permute(0, 3, 1, 2)
 
-        return x * norm
+        # TODO speedup
+        amount_of_convolutions = (height // 3) * (width // 3)
+        warn("this doesn't feel correct (had a bad morning)")
+        # |det| == |det(Kernel)^amount_of_convolutions|
+        norm = (det ** amount_of_convolutions).abs()
+
+        if torch.isnan(norm).any():
+            print("asdf")
+        assert torch.isnan(norm).any() == False
+
+        # log |det|^-1 = -log |det|
+        loged_norm = -norm.log()
+        warn("for the normalization, the -norm.log() part happens where the norm is created!")
+
+""""
+        Momentan ist folgendes Problem:
+        der ich bekomme nach einer gewissen Anzahl an Runden nan in die diagonale
+        jetzt versuche ich den Gradienten anzuschauen um zu kucken, ob es an dem
+        liegt
+        Ideen könnten sein, den Normalisierungsterm nicht für die Gradientenrechnung zu benutzen.
+        printt("grad", self.weights.grad)
+        if Batch_Idx >= 769:
+            pass
+"""
+        return x, loged_norm
 
 
-class DepthConvBundl(nn.Module):
+class DepthConvBundle(nn.Module):
 
     def __init__(self, kernel_size=KERNEL_SIZE, bundle_count=KERNEL_SIZE_SQ):
         super().__init__()
+        #self.logd_norms = torch.empty(bundle_count)
         self.bundle = nn.ModuleList()
         for _ in range(bundle_count):
             self.bundle.append(DepthConv(kernel_size))
 
     def __call__(self, x):
-        for conv in self.bundle:
-            x = conv(x)
-        return x
+        logd_norm_sums = torch.zeros(1, device=DEVICE)
+        for i, conv in enumerate(self.bundle):
+            x, log_norm = conv(x)
+            logd_norm_sums = logd_norm_sums.add(log_norm)
+        #logd_norm_sum = self.logd_norms.sum()
+        #self.logd_norms
+        return x, logd_norm_sums
 
         """"
         # x.shape == batch, channel, width, height

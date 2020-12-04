@@ -6,22 +6,28 @@ import torch.nn.functional as F
 import torch.optim as optim
 
 from model.pyramid_flow_model import PyramidFlowModel
+from model.flow_loss import FlowLoss
 
 from misc.misc import *
 from misc.constants import *
 
 #https://nextjournal.com/gkoehler/pytorch-mnist
 
-n_epochs = 3
-batch_size_train = 1#64
+n_epochs = 50
+batch_size_train = 64
 batch_size_test = 1000
-learning_rate = 0.01
-momentum = 0.5
-log_interval = 10
+warn("high learning rate")
+learning_rate = 1e-3
+#learning_rate = 5e-2
+#momentum = 0.5
+weight_decay = 5e-5
+log_interval = 100
+
+
 
 torch.backends.cudnn.deterministic = True
 
-random_seed = 1
+random_seed = 1337
 torch.manual_seed(random_seed)
 
 transformation = torchvision.transforms.Compose([
@@ -29,9 +35,9 @@ transformation = torchvision.transforms.Compose([
                                 #left, top, right and bottom
                                 # for MNIST
                                torchvision.transforms.Pad([0,0,2,2], padding_mode='edge'),
-                               torchvision.transforms.Normalize(
-                                 (0.1307,), (0.3081,))
-                             ])
+                               #torchvision.transforms.Normalize(
+                               #  (0.1307,), (0.3081,))
+                                ])
 
 train_loader = torch.utils.data.DataLoader(
   torchvision.datasets.MNIST('/files/', train=True, download=True,
@@ -43,9 +49,15 @@ test_loader = torch.utils.data.DataLoader(
                              transform=transformation),
   batch_size=batch_size_test, shuffle=True)
 
-network = PyramidFlowModel()
-optimizer = optim.SGD(network.parameters(), lr=learning_rate,
-                      momentum=momentum)
+pyrFlow = PyramidFlowModel()
+
+warn("check k=256")
+flow_loss = FlowLoss(DATA_WIDTH*DATA_HEIGHT, k=256)
+
+#optimizer = optim.SGD(network.parameters(), lr=learning_rate,
+#                      momentum=momentum)
+
+optimizer = optim.Adam(pyrFlow.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
 train_losses = []
 train_counter = []
@@ -61,29 +73,40 @@ def cut_data(data):
 """
 
 def train(epoch):
-  network.train()
-  for batch_idx, (data, target) in enumerate(train_loader):
-    data = data.to(DEVICE)
-    target = target.to(DEVICE)
+    pyrFlow.train()
+    global Batch_Idx
+    for batch_idx, (data, target) in enumerate(train_loader):
+        Batch_Idx = batch_idx
+        data = data.to(DEVICE)
+        #plot_mnist(data)
+        print(batch_idx)
+        #print_shape("data", data)
+        #print(data.max().item())
 
-    print_shape("data", data)
+        optimizer.zero_grad()
 
-    optimizer.zero_grad()
+        y, norm = pyrFlow(data)
+        loss = flow_loss(y, norm)
 
-    output = network(data)
+        if batch_idx > 768:
+            printt("loss", loss)
+            printt("grad", loss.grad)
 
-    loss = F.nll_loss(output, target)
-    loss.backward()
-    optimizer.step()
-    if batch_idx % log_interval == 0:
-      print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-        epoch, batch_idx * len(data), len(train_loader.dataset),
-        100. * batch_idx / len(train_loader), loss.item()))
-      train_losses.append(loss.item())
-      train_counter.append(
-        (batch_idx*64) + ((epoch-1)*len(train_loader.dataset)))
-      torch.save(network.state_dict(), '/results/model.pth')
-      torch.save(optimizer.state_dict(), '/results/optimizer.pth')
+        loss.backward()
+        optimizer.step()
+
+        if batch_idx % log_interval == 0:
+
+            #printt(str(batch_idx), pyrFlow.parameters())
+
+            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+            epoch, batch_idx * len(data), len(train_loader.dataset),
+            100. * batch_idx / len(train_loader), loss.item() / (DATA_WIDTH*DATA_HEIGHT)))
+            train_losses.append(loss.item())
+            train_counter.append((batch_idx*64) + ((epoch-1)*len(train_loader.dataset)))
+            #torch.save(pyrFlow.state_dict(), './results/model.pth')
+            #torch.save(optimizer.state_dict(), './results/optimizer.pth')
+
 
 for epoch in range(1, n_epochs + 1):
-  train(epoch)
+    train(epoch)
