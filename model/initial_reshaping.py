@@ -13,17 +13,20 @@ def initialReshaping(x):
 
     #printt("x start", x)
     with torch.no_grad():
-        new_x = torch.empty((batch_size, height // KERNEL_SIZE, width // KERNEL_SIZE, KERNEL_SIZE_SQ), device=DEVICE)
+        new_x = torch.empty((batch_size, height // KERNEL_SIZE, width // KERNEL_SIZE, KERNEL_SIZE_SQ*CHANNEL_COUNT),
+                            device=DEVICE)
         #summer = torch.zeros(1, device=DEVICE)
         #print_shape("new_x", new_x)
+        #row = x.narrow(HEIGHT_DIM, h * KERNEL_SIZE, KERNEL_SIZE)
+        #patch = row.narrow(WIDTH_DIM, w * KERNEL_SIZE, KERNEL_SIZE)
+
         for h in range(height // KERNEL_SIZE):
-            #row = x.narrow(HEIGHT_DIM, h * KERNEL_SIZE, KERNEL_SIZE)
             for w in range(width // KERNEL_SIZE):
-                #patch = row.narrow(WIDTH_DIM, w * KERNEL_SIZE, KERNEL_SIZE)
                 h_start = h*KERNEL_SIZE
                 w_start = w*KERNEL_SIZE
                 patch = x[:,:,h_start:h_start+KERNEL_SIZE, w_start:w_start+KERNEL_SIZE]
-                flattened = patch.reshape((batch_size, KERNEL_SIZE_SQ))
+                # TODO: sollte man hier erst alle blauen, alle roten und alle grünen listen?
+                flattened = patch.reshape((batch_size, KERNEL_SIZE_SQ*CHANNEL_COUNT))
                 #if h == 7 and w == 3:
                 #    print(str(h) + "   " + str(w))
                 #    printt("patch", patch)

@@ -14,7 +14,7 @@ class PyramidFlowModel(nn.Module):
     def __init__(self):
         super().__init__()
 
-        self.conv_1 = DepthConvBundle(KERNEL_SIZE, 1)#KERNEL_SIZE_SQ)
+        self.conv_1 = DepthConvBundle(KERNEL_SIZE, KERNEL_SIZE_SQ)
 
     def forward(self, x):
         x = initialReshaping(x)
