@@ -22,7 +22,7 @@ class CutOff(LayerModule):
 
     def forward(self, x):
         channel_count = x.shape[CHANNEL_DIM]
-        remains = x[:,0:channel_count - self.remove_dimension_count,:,:]
-        cut_off = x[:,self.remove_dimension_count:,:,:]
+        remains = x[:,:,:,0:channel_count - self.remove_dimension_count]
+        cut_off = x[:,:,:,self.remove_dimension_count:]
 
         return remains, cut_off

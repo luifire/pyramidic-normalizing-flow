@@ -63,3 +63,41 @@ def print_parameter_weights(pyrFlow):
         #    d = diag.abs()
         #    print(f"{i} diag min: {d.min():.3e} max: {d.max():.3e} prod: {d.prod():.3e} avg total {diag.mean():.3e}")
             #printt("grad", pyrFlow.conv_1.bundle[0].weights)
+
+
+def test_polynomes():
+    a = torch.arange(2*2*2*3).float().reshape((2, 2, 2, 3)) + 1
+    print(a)
+    flat = a.flatten(1, -1)
+    print(flat)
+    print(flat.reshape(2,2,2,3))
+    total_dim = flat.shape[1]
+
+
+    shift_matrix = torch.zeros(total_dim, total_dim)
+    hole_filler_matrix = torch.zeros(total_dim, total_dim)
+
+    for i in range(total_dim):
+        shift_matrix[i, (i + 1) % total_dim] = 1 * ((i+1) % 2)
+        hole_filler_matrix[i, i] = 1 * ((i+1) % 2)
+
+    rotated = flat.matmul(shift_matrix)
+    print(rotated)
+
+    print(shift_matrix)
+
+    zero_hole_filler = torch.ones(total_dim)
+    hole_filler = zero_hole_filler.matmul(hole_filler_matrix)
+    print(hole_filler)
+
+    result = rotated + hole_filler
+    final = result * flat
+    for a in range(2):
+        print("--------")
+        print(flat[a])
+        print(result[a])
+        print(final[a])
+
+    exit(1)
+
+#test_polynomes()

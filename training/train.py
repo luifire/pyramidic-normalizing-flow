@@ -1,4 +1,3 @@
-import torchvision
 import torch.optim as optim
 
 from model.pyramid_flow_model import PyramidFlowModel
@@ -7,9 +6,6 @@ from model.pyramid_loss import PyramidLoss
 from misc.misc import *
 from misc.constants import *
 from misc import helper
-import time
-
-#https://nextjournal.com/gkoehler/pytorch-mnist
 
 train_loader, test_loader = helper.load_dataset()
 
@@ -57,9 +53,9 @@ def train(epoch):
 
             #printt(str(batch_idx), pyrFlow.parameters())
 
-            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.5f} bits/dim'.format(
+            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.3f} bits/dim'.format(
                 epoch, batch_idx * len(data), len(train_loader.dataset),
-                       100. * batch_idx / len(train_loader), loss.item() / (DATA_WIDTH*DATA_HEIGHT)))
+                100. * batch_idx / len(train_loader), loss.item() / (DATA_WIDTH*DATA_HEIGHT)))
             train_losses.append(loss.item())
             train_counter.append((batch_idx*64) + ((epoch-1)*len(train_loader.dataset)))
 

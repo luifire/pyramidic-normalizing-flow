@@ -15,6 +15,7 @@ class PyramidLoss(nn.Module):
         self.rv_size = rv_size
         self.weight_decrease = weight_decrease
         self.prior = []
+        self.discretisation_offset = np.log(self.k) * self.rv_size
 
     """ we create the prior dynamically """
     def get_prior(self, i, size):
@@ -34,7 +35,7 @@ class PyramidLoss(nn.Module):
             prior_ll = prior.log_prob(z)
 
             # -log(k) * rv_size um die Discretisierung weg zu rechnen
-            corrected_prior_ll = prior_ll - np.log(self.k) * self.rv_size # np.prod(z.size()[1:])
+            corrected_prior_ll = prior_ll - self.discretisation_offset
 
             ll = corrected_prior_ll + summed_logd_det
             nll = -ll.mean()

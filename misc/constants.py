@@ -7,14 +7,15 @@ KERNEL_SIZE = 3
 #print("!!!!!!!!!! Kernel Size 2")
 KERNEL_SIZE_SQ = KERNEL_SIZE**2
 
-CHANNEL_DIM = 1
-HEIGHT_DIM = 2
-WIDTH_DIM = 3
+HEIGHT_DIM = 1
+WIDTH_DIM = 2
+CHANNEL_DIM = 3
 
 n_epochs = 500
 batch_size_train = 32
 batch_size_test = 1000
-learning_rate = 1e-4
+#learning_rate = 1e-4
+learning_rate = 1e-3
 # z.t. 10-5 für GLOW etc.
 #learning_rate = 5e-2
 #momentum = 0.5
@@ -52,6 +53,7 @@ else:
 
 def _printt(name, var):
     print(name + ": " + str(var))
+
 
 _printt("learning_rate", learning_rate)
 _printt("batch_size_train", batch_size_train)

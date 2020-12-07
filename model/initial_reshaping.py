@@ -46,6 +46,6 @@ def initialReshaping(x):
         #printt("summer", summer)
         #printt("x", x.sum())
         #exit(1)
-        return new_x.permute(0, 3, 1, 2)
+        return new_x # .permute(0, 3, 1, 2)
 
     raise Exception("This shouldn't happen")

@@ -42,11 +42,11 @@ def load_dataset():
     return train_loader, test_loader
 
 
-def channel_to_last_dim(x):
+def __channel_to_last_dim(x):
     return x.permute(0, 2, 3, 1)
 
 
-def channel_normal_position(x):
+def __channel_normal_position(x):
     return x.permute(0, 3, 1, 2)
 
 #def add_noise(batch):

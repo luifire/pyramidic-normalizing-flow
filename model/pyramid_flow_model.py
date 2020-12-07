@@ -9,6 +9,7 @@ from model.pyramid_loss import PyramidLoss
 from model.s_log_gate import SLogGate
 from model.layer_module import LayerModule
 from model.cut_off_layer import CutOff
+from model.conv_bundle import DepthConvBundle
 
 from misc.constants import *
 
@@ -20,14 +21,15 @@ class PyramidFlowModel(LayerModule):
 
         # TODO make this prettier
         self.layer_list = nn.ModuleList()
-
-        repeat = 3
-        self.layer_list.append(DepthConvBundle("1", KERNEL_SIZE, repeat))
+        channel_size = KERNEL_SIZE_SQ * CHANNEL_COUNT
+        bundle_size = channel_size # s.t. every pixel consists of all others
+        cut_off = 3
+        #channel_size = 1 # warn
+        self.layer_list.append(DepthConvBundle("1", channel_count=channel_size, bundle_size=bundle_size))
         self.layer_list.append(SLogGate())
-        self.layer_list.append(DepthConvBundle("2", KERNEL_SIZE, repeat))
-        self.layer_list.append(CutOff(3))
-        #self.conv_1 = DepthConvBundle(KERNEL_SIZE, KERNEL_SIZE_SQ)
-        #self.act_1 = SLogGate()
+        self.layer_list.append(DepthConvBundle("2", channel_count=channel_size, bundle_size=3))
+        #self.layer_list.append(CutOff(cut_off))
+        channel_size -= cut_off * CHANNEL_COUNT
 
     def forward(self, x):
         pyramid_steps = []
