@@ -56,11 +56,10 @@ def visualize(node, network):
 
 
 def print_parameter_weights(pyrFlow):
-    for i in range(KERNEL_SIZE_SQ):
-        diag = pyrFlow.conv_1.bundle[i].weights.diagonal()
-        d = diag.abs()
-        print(f"{i} diag min: {d.min():.3e} max: {d.max():.3e} prod: {d.prod():.3e} avg total {diag.mean():.3e}")
-        #printt("grad", pyrFlow.conv_1.bundle[0].weights)
-
-def print_params():
-    pass
+    for layer in pyrFlow.layer_list:
+        layer.print_parameter()
+        #for i in range(KERNEL_SIZE_SQ):
+        #    diag = pyrFlow.layer_list[0].bundle[i].weights.diagonal()
+        #    d = diag.abs()
+        #    print(f"{i} diag min: {d.min():.3e} max: {d.max():.3e} prod: {d.prod():.3e} avg total {diag.mean():.3e}")
+            #printt("grad", pyrFlow.conv_1.bundle[0].weights)

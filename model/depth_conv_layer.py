@@ -3,20 +3,23 @@ import torch
 import torch.nn.functional as F
 
 from model.shift_channel_layer import ChannelShifter
+from model.layer_module import LayerModule
 
 from misc.misc import *
 from misc.constants import *
 from misc.helper import channel_to_last_dim, channel_normal_position
+
 # BIAS
 
 
-class DepthConv(nn.Module):
+class DepthConv(LayerModule):
 
     """  """
-    def __init__(self, kernel_size):
+    def __init__(self, name, kernel_size):
         super().__init__()
         self.kernel_size = kernel_size
         self.kernel_size_sq = kernel_size**2
+        self.name = name
 
         total_kernel_size = self.kernel_size_sq*CHANNEL_COUNT
         # 1.5 kind of suggested by IFA-VAE
@@ -55,25 +58,36 @@ class DepthConv(nn.Module):
         x = channel_normal_position(x)
 
         # TODO speedup
-        amount_of_convolutions = (height // 3) * (width // 3)
+        amount_of_convolutions = (height // self.kernel_size) * (width // self.kernel_size)
         # |det| == |det(Kernel)^amount_of_convolutions|
         # Note that the power part ccan be done like this
         # log(|a^b|) = log(|a|^b) = b log(|a|)
         det_logd = det.abs().log()
-        inverted_det_for_all = -amount_of_convolutions * det_logd
+        inverted_det_for_all = amount_of_convolutions * det_logd
 
         return x, inverted_det_for_all
 
+    def print_parameter(self):
+        w = self.weights
+        dia = w.diag().abs()
+        print(f"{self.name} diag min: {dia.min():.3e} max: {dia.max():.3e} prod: {dia.prod():.3e} "
+              f"avg total {w.mean():.3e} bias mean {self.bias.mean():.3e}")
 
-class DepthConvBundle(nn.Module):
+    def get_parameter_count(self):
+        dim = self.weights.shape[0]
+        return (dim ** 2 + dim) / 2
 
-    def __init__(self, kernel_size=KERNEL_SIZE, bundle_count=KERNEL_SIZE_SQ):
+class DepthConvBundle(LayerModule):
+
+    def __init__(self, name, kernel_size=KERNEL_SIZE, bundle_count=KERNEL_SIZE_SQ):
         super().__init__()
         self.bundle = nn.ModuleList()
+        self.name = name
         #self.channel_shifter = ChannelShifter(kernel_size ** 2 * CHANNEL_COUNT)
 
-        for _ in range(bundle_count):
-            self.bundle.append(DepthConv(kernel_size))
+        for i in range(bundle_count):
+            conv_name = "Bundle " + name + " Conv " + str(i)
+            self.bundle.append(DepthConv(conv_name, kernel_size))
 
     def __call__(self, x):
         logd_norm_sums = torch.zeros(1, device=DEVICE)
@@ -86,4 +100,9 @@ class DepthConvBundle(nn.Module):
         #self.logd_norms
         return x, logd_norm_sums
 
+    def print_parameter(self):
+        for layer in self.bundle:
+            layer.print_parameter()
 
+    def get_parameter_count(self):
+        return sum([layer.get_parameter_count() for layer in self.bundle])

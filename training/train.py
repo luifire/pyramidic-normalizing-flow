@@ -2,7 +2,7 @@ import torchvision
 import torch.optim as optim
 
 from model.pyramid_flow_model import PyramidFlowModel
-from model.flow_loss import FlowLoss
+from model.pyramid_loss import PyramidLoss
 
 from misc.misc import *
 from misc.constants import *
@@ -14,9 +14,10 @@ import time
 train_loader, test_loader = helper.load_dataset()
 
 pyrFlow = PyramidFlowModel()
+printt("Param Count: ", pyrFlow.get_parameter_count())
 
 warn("check k=256")
-flow_loss = FlowLoss(DATA_WIDTH*DATA_HEIGHT*CHANNEL_COUNT, k=256)
+pyramid_loss = PyramidLoss(DATA_WIDTH * DATA_HEIGHT * CHANNEL_COUNT, k=256)
 
 optimizer = optim.Adam(pyrFlow.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
@@ -37,8 +38,8 @@ def train(epoch):
 
         optimizer.zero_grad()
 
-        y, norm = pyrFlow(data)
-        loss = flow_loss(y, norm)
+        pyramid_steps, norm = pyrFlow(data)
+        loss = pyramid_loss(pyramid_steps, norm)
 
         loss.backward()
         if batch_idx > 881 and False:
@@ -56,7 +57,7 @@ def train(epoch):
 
             #printt(str(batch_idx), pyrFlow.parameters())
 
-            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.5f} bits/dim'.format(
                 epoch, batch_idx * len(data), len(train_loader.dataset),
                        100. * batch_idx / len(train_loader), loss.item() / (DATA_WIDTH*DATA_HEIGHT)))
             train_losses.append(loss.item())
@@ -67,5 +68,6 @@ def train(epoch):
 
 
 for epoch in range(1, n_epochs + 1):
+    pyrFlow.print_parameter()
     train(epoch)
     #print_parameter_weights(pyrFlow)
