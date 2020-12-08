@@ -10,12 +10,16 @@ from misc.constants import *
 
 class DepthConv(LayerModule):
 
-    """  """
-    def __init__(self, name, channel_count):
+    """  so we ignore all pixels from 1...pixel_idx (pixel 0 was just
+    swapped from the bottom and thus needs to be filled) """
+    def __init__(self, name, channel_count, jump_over_pixels, pixel_idx=-1):
         super().__init__()
         self.channel_count = channel_count
+        self.jump_over_pixels = jump_over_pixels
         #self.kernel_size_sq = channel_count ** 2
         self.name = name
+        self.kernel_size = channel_count // PIXEL_DEPTH
+        warn("this will not be correct, when we go deeper!")
 
         #total_kernel_size = self.kernel_size_sq*CHANNEL_COUNT
         # 1.5 kind of suggested by IFA-VAE
@@ -23,17 +27,51 @@ class DepthConv(LayerModule):
         #printt("init weights", weights)
         self.weights = nn.Parameter(weights, requires_grad=True)  # nn.Parameter is a Tensor that's a module parameter.
 
+        self.create_identity_part(pixel_idx)
         #bias = torch.normal(mean=1.5, std=0.5, size=[total_kernel_size], device=DEVICE)
         #self.bias = nn.Parameter(bias, requires_grad=True)  # nn.Parameter is a Tensor that's a module parameter.
+
+    def create_identity_part(self, pixel_idx):
+        # not relevant here
+        if pixel_idx == 0:
+            self.identity_start = 0
+            return
+
+        pixel_start = 1
+        pixel_end = pixel_idx + 1
+        if self.jump_over_pixels:
+            pixel_start *= PIXEL_DEPTH
+            pixel_end *= PIXEL_DEPTH
+
+        self.identity_start = pixel_start
+        self.identity_end = pixel_end
+
+        identity = torch.eye(self.channel_count, device=DEVICE)
+        self.identity_keeper_sub_matrix = identity[pixel_start:pixel_end]
+        #printt("keep_identity", self.identity_keeper_sub_matrix)
 
     def _prepare_weight_matrix_and_norm(self):
         # make triangular matrix
         # printt("forward 1. weights", self.weights)
         #printt("device", self.weights.device)
 
+        # keep the values that have already been changed.
+        # this is to hinder the network of making things more complicated
+        if self.identity_start > 0:
+            with torch.no_grad():
+                #printt("weights before", self.weights)
+                self.weights[self.identity_start:self.identity_end] = self.identity_keeper_sub_matrix
+                #printt("weights after", self.weights)
+
         weights = torch.triu(self.weights)
 
         diag = torch.diagonal(weights)
+
+        if False and diag.prod().item() == 0:
+            print(self.name)
+            print(diag)
+
+            print("diag has zeros")
 
         logd_det = diag.abs().log().sum()
 
@@ -52,11 +90,11 @@ class DepthConv(LayerModule):
         #x = channel_normal_position(x)
 
         # TODO speedup
-        amount_of_convolutions = (height // self.channel_count) * (width // self.channel_count)
+        amount_of_convolutions = height * width
         # |det| == |det(Kernel)^amount_of_convolutions|
         # Note that the power part ccan be done like this
         # log(|a^b|) = log(|a|^b) = b log(|a|)
-        inverted_det_for_all = amount_of_convolutions * logd_det
+        inverted_det_for_all = logd_det * amount_of_convolutions
 
         return x, inverted_det_for_all
 

@@ -16,7 +16,7 @@ class CutOff(LayerModule):
     def __init__(self, remove_pixel_count):
         super().__init__()
 
-        self.remove_dimension_count = remove_pixel_count * CHANNEL_COUNT
+        self.remove_dimension_count = remove_pixel_count * PIXEL_DEPTH
         # dummy registration
         self.dummy = nn.Parameter(torch.zeros(1, device=DEVICE))
 

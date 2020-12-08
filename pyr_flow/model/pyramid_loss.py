@@ -43,6 +43,10 @@ class PyramidLoss(nn.Module):
             weight = 1 / self.weight_decrease**i
             loss += nll * weight
 
-        return loss
+            #if loss.isnan() or loss.isinf():
+            #    warn("loss is " + loss.item())
+            #    exit(1)
+
+        return loss, corrected_prior_ll
 
 

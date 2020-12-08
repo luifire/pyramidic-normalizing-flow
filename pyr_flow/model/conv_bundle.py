@@ -11,17 +11,19 @@ from model.depth_conv_layer import DepthConv
 
 class DepthConvBundle(LayerModule):
 
-    def __init__(self, name, channel_count, bundle_size):
+    """ jump_over_pixels : if true, then for rotation we rotate over them (in channel shifter)"""
+    def __init__(self, name, channel_count, bundle_size, jump_over_pixels):
         super().__init__()
         self.bundle = nn.ModuleList()
         self.name = name
-        self.channel_shifter = ChannelShifter(channel_count)
+        self.channel_shifter = ChannelShifter(channel_count, jump_over_pixels)
         bias = torch.normal(mean=1.5, std=0.5, size=[channel_count], device=DEVICE)
         self.bias = nn.Parameter(bias, requires_grad=True)  # nn.Parameter is a Tensor that's a module parameter.
 
         for i in range(bundle_size):
             conv_name = "Bundle " + name + " Conv " + str(i)
-            self.bundle.append(DepthConv(conv_name, channel_count))
+            self.bundle.append(DepthConv(name=conv_name, channel_count=channel_count,
+                                         jump_over_pixels=jump_over_pixels, pixel_idx=i))
 
     def __call__(self, x):
         logd_norm_sums = torch.zeros(1, device=DEVICE)

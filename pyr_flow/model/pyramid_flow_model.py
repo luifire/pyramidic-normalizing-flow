@@ -1,15 +1,10 @@
-import torch
-import torch.nn as nn
-import torch.optim as optim
-import torch.nn.functional as F
-
 from model.depth_conv_layer import *
 from model.initial_reshaping import initialReshaping
-from model.pyramid_loss import PyramidLoss
 from model.s_log_gate import SLogGate
 from model.layer_module import LayerModule
 from model.cut_off_layer import CutOff
 from model.conv_bundle import DepthConvBundle
+from model.invertible_polynomes import InvertiblePolynome
 
 from misc.constants import *
 
@@ -21,15 +16,26 @@ class PyramidFlowModel(LayerModule):
 
         # TODO make this prettier
         self.layer_list = nn.ModuleList()
-        channel_size = KERNEL_SIZE_SQ * CHANNEL_COUNT
+        channel_size = KERNEL_SIZE_SQ * PIXEL_DEPTH
         bundle_size = channel_size # s.t. every pixel consists of all others
-        cut_off = 3
+        bundle_size = KERNEL_SIZE_SQ
+        #bundle_size = 2
+        bundle_size_2 = 2
         #channel_size = 1 # warn
-        self.layer_list.append(DepthConvBundle("1", channel_count=channel_size, bundle_size=bundle_size))
+        self.layer_list.append(DepthConvBundle("1", channel_count=channel_size, bundle_size=bundle_size,
+                                               jump_over_pixels=True))
+
+        self.layer_list.append(InvertiblePolynome())
         self.layer_list.append(SLogGate())
-        self.layer_list.append(DepthConvBundle("2", channel_count=channel_size, bundle_size=3))
-        #self.layer_list.append(CutOff(cut_off))
-        channel_size -= cut_off * CHANNEL_COUNT
+        self.layer_list.append(DepthConvBundle("2", channel_count=channel_size, bundle_size=bundle_size_2,
+                                               jump_over_pixels=True))
+        self.layer_list.append(InvertiblePolynome())
+
+
+        #self.layer_list.append(CutOff(channel_size // 2))
+
+        self.layer_list.append(DepthConvBundle("1", channel_count=channel_size, bundle_size=bundle_size,
+                                           jump_over_pixels=True))
 
     def forward(self, x):
         pyramid_steps = []

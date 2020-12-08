@@ -1,6 +1,8 @@
 import warnings
 from torchviz.dot import make_dot
 import numpy as np
+import os
+from shutil import rmtree
 
 from misc.constants import *
 
@@ -34,7 +36,7 @@ def plot_data(data):
         plt.tight_layout()
         d = data[i].cpu().numpy()
         # unnormalize
-        if DATA_SET == DataSet.CIFAR:
+        if TRAIN_DATA_SET == DataSet.CIFAR:
             #d = d / 2 + 0.5
             pass
         #print(d.shape)
@@ -52,7 +54,7 @@ def plot_data(data):
 
 def visualize(node, network):
     dot = make_dot(node, params=dict(network.named_parameters()))
-    dot.render("graph", format="svg", view=False)
+    dot.render("../graph", format="svg", view=False)
 
 
 def print_parameter_weights(pyrFlow):
@@ -101,3 +103,10 @@ def test_polynomes():
     exit(1)
 
 #test_polynomes()
+
+
+def clean_up_dir():
+    if os.path.exists(STATE_DIR):
+        rmtree(STATE_DIR)
+    if not os.path.exists(STATE_DIR):
+        os.makedirs(STATE_DIR)
