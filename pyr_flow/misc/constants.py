@@ -24,8 +24,8 @@ WEIGHT_DECAY = 5e-5
 LOG_INTERVAL = 100
 EVAL_INTERVAL = 5 # every epoches
 
-random_seed = 1337
-torch.manual_seed(random_seed)
+RANDOM_SEED = 1337
+torch.manual_seed(RANDOM_SEED)
 
 torch.backends.cudnn.deterministic = True
 torch.set_printoptions(linewidth=130)
