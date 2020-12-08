@@ -33,10 +33,10 @@ class PyramidFlowModel(LayerModule):
         self.layer_list.append(InvertiblePolynome())
         """
         #self.layer_list.append(CutOff(channel_size // 2))
-
-        self.layer_list.append(DepthConvBundle("1", channel_count=channel_size, bundle_size=bundle_size,
-                                           jump_over_pixels=True))
         """
+        self.layer_list.append(DepthConvBundle("3", channel_count=channel_size, bundle_size=1,
+                                           jump_over_pixels=True))
+        
     def forward(self, x):
         pyramid_steps = []
         x = initialReshaping(x)
