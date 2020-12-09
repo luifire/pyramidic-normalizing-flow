@@ -22,8 +22,13 @@ class DepthConv(LayerModule):
         warn("this will not be correct, when we go deeper!")
 
         #total_kernel_size = self.kernel_size_sq*CHANNEL_COUNT
-        # 1.5 kind of suggested by IFA-VAE
-        weights = torch.normal(mean=1.5, std=0.5, size=[channel_count, channel_count], device=DEVICE)
+        # NOT: 1.5 kind of suggested by IFA-VAE
+        # Weight init kind of suggested by invertible conv flow
+        #weights = torch.normal(mean=1.5, std=0.5, size=[channel_count, channel_count], device=DEVICE)
+        weights = torch.normal(mean=0, std=0.1, size=[channel_count, channel_count])
+        weights += torch.eye(channel_count)# * torch.normal(mean=1, std=0.1, size=[channel_count])
+        weights = weights.to(DEVICE)
+
         #printt("init weights", weights)
         self.weights = nn.Parameter(weights, requires_grad=True)  # nn.Parameter is a Tensor that's a module parameter.
 
@@ -57,7 +62,7 @@ class DepthConv(LayerModule):
 
         # keep the values that have already been changed.
         # this is to hinder the network of making things more complicated
-        if self.identity_start > 0:
+        if True and self.identity_start > 0:
             with torch.no_grad():
                 #printt("weights before", self.weights)
                 self.weights[self.identity_start:self.identity_end] = self.identity_keeper_sub_matrix
@@ -94,9 +99,9 @@ class DepthConv(LayerModule):
         # |det| == |det(Kernel)^amount_of_convolutions|
         # Note that the power part ccan be done like this
         # log(|a^b|) = log(|a|^b) = b log(|a|)
-        inverted_det_for_all = logd_det * amount_of_convolutions
+        total_logd_det = logd_det * amount_of_convolutions
 
-        return x, inverted_det_for_all
+        return x, total_logd_det
 
     def print_parameter(self):
         w = self.weights

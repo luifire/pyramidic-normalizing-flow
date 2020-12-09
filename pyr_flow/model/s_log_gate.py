@@ -14,18 +14,19 @@ class SLogGate(LayerModule):
 
         # see: "Initialization of the parameter" in "Invertible Convolutional Flow"
         #self.alpha = nn.Parameter(torch.tensor(0.01, device=DEVICE))
-        self.alpha = nn.Parameter(torch.tensor(-4.605, device=DEVICE)) # exp(alpha) ~= 0.01
+        self.alpha = nn.Parameter(torch.tensor(0.1, device=DEVICE)) # exp(alpha) ~= 0.01
 
     def forward(self, x: torch.Tensor):
         # alpha should be positive
         #positive_alpha = self.alpha.exp()
         warn("if nan should occure, it could be because of this alpha")
         positive_alpha = self.alpha
-        #|x|/a * (exp(a |x|) -1)
-        bracket = (positive_alpha * x.abs()).exp() - 1
+        x_abs = x.abs()
+        #sign(x)/a * (exp(a |x|) -1)
+        bracket = (positive_alpha * x_abs).exp() - 1
         y = x.sign() / positive_alpha * bracket
 
-        normalization = positive_alpha * x.abs()
+        normalization = positive_alpha * x_abs
         total_norm = normalization.sum(1).sum(1).sum(1)
 
         return y, total_norm
@@ -53,7 +54,7 @@ class SLogGate(LayerModule):
         return y, normalization
 
     def print_parameter(self):
-        print(f"Alpha: {self.alpha.exp():.3e}")
+        print(f"Alpha: {self.alpha:.3e}")
 
     def get_parameter_count(self):
         return 1

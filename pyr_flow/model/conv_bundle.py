@@ -26,7 +26,7 @@ class DepthConvBundle(LayerModule):
                                          jump_over_pixels=jump_over_pixels, pixel_idx=i))
 
     def __call__(self, x):
-        logd_norm_sums = torch.zeros(1, device=DEVICE)
+        logd_norm_sums = torch.zeros(x.shape[BATCH_DIM], device=DEVICE)
         for i, layer in enumerate(self.bundle):
             x, log_norm = layer(x)
             logd_norm_sums = logd_norm_sums.add(log_norm)

@@ -38,11 +38,12 @@ class PyramidLoss(nn.Module):
             corrected_prior_ll = prior_ll - self.discretisation_offset
 
             ll = corrected_prior_ll + summed_logd_det
+            #ll = summed_logd_det
             nll = -ll.mean()
 
+            # pyramid weighting
             weight = 1 / self.weight_decrease**i
             loss += nll * weight
-
             #if loss.isnan() or loss.isinf():
             #    warn("loss is " + loss.item())
             #    exit(1)

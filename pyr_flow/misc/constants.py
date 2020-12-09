@@ -7,6 +7,7 @@ KERNEL_SIZE = 3
 #print("!!!!!!!!!! Kernel Size 2")
 KERNEL_SIZE_SQ = KERNEL_SIZE**2
 
+BATCH_DIM = 0
 HEIGHT_DIM = 1
 WIDTH_DIM = 2
 CHANNEL_DIM = 3
@@ -15,7 +16,7 @@ N_EPOCHS = 500
 BATCH_SIZE_TRAIN = 32
 BATCH_SIZE_TEST = 1000
 LEARNING_RATE = 1e-4
-#learning_rate = 1e-3
+#LEARNING_RATE = 1e-3
 #learning_rate = 1e-1
 # z.t. 10-5 für GLOW etc.
 #learning_rate = 5e-2

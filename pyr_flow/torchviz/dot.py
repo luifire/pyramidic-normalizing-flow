@@ -38,6 +38,7 @@ def make_dot(var, params=None):
 
     def add_nodes(var):
         if var not in seen:
+            name = var.node_name if 'node_name' in dir(var) else ''
             if torch.is_tensor(var):
                 # note: this used to show .saved_tensors in pytorch0.2, but stopped
                 # working as it was moved to ATen and Variable-Tensor merged
@@ -48,9 +49,9 @@ def make_dot(var, params=None):
                 node_name = '%s\n %s' % (name, size_to_str(u.size()))
                 dot.node(str(id(var)), node_name, fillcolor='lightblue')
             elif var in output_nodes:
-                dot.node(str(id(var)), str(type(var).__name__), fillcolor='darkolivegreen1')
+                dot.node(str(id(var)), str(type(var).__name__) + name, fillcolor='darkolivegreen1')
             else:
-                dot.node(str(id(var)), str(type(var).__name__))
+                dot.node(str(id(var)), str(type(var).__name__) + name)
             seen.add(var)
             if hasattr(var, 'next_functions'):
                 for u in var.next_functions:

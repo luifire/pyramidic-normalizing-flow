@@ -27,6 +27,7 @@ print("Currently Paramcount incorrect (it's less params)")
 printt("Param Count: ", pyrFlow.get_parameter_count())
 warn("check k=256")
 
+
 def train(epoch):
     pyrFlow.train()
     global Batch_Idx
@@ -74,8 +75,8 @@ def train(epoch):
 for epoch in range(1, N_EPOCHS + 1):
     pyrFlow.print_parameter()
     if epoch % EVAL_INTERVAL == 0:
-        loss = evaluation.eval_on_normal_test_set(pyrFlow, pyramid_loss, TOTAL_IMAGE_DIMENSION)
-        name = f'{epoch} - loss - {loss:.3f}'
+        eval_loss = evaluation.eval_on_normal_test_set(pyrFlow, pyramid_loss, TOTAL_IMAGE_DIMENSION)
+        name = f'{epoch} - loss - {eval_loss:.3f}'
 
         torch.save(pyrFlow.state_dict(), f'{STATE_DIR}/{name}.model')
         torch.save(optimizer.state_dict(), f'{STATE_DIR}/{name}.optimizer')
