@@ -1,5 +1,4 @@
 import torch.optim as optim
-import os
 
 from model.pyramid_flow_model import PyramidFlowModel
 from model.pyramid_loss import PyramidLoss
@@ -23,10 +22,7 @@ optimizer = optim.Adam(pyrFlow.parameters(), lr=LEARNING_RATE, weight_decay=WEIG
 # FOLDER INIT
 clean_up_dir()
 
-print("Currently Paramcount incorrect (it's less params)")
 printt("Param Count: ", pyrFlow.get_parameter_count())
-warn("check k=256")
-
 
 def train(epoch):
     pyrFlow.train()
@@ -40,8 +36,8 @@ def train(epoch):
 
         optimizer.zero_grad()
 
-        pyramid_steps, norm = pyrFlow(data)
-        loss, prior = pyramid_loss(pyramid_steps, norm)
+        pyramid_steps, pyramid_steps_lnorm = pyrFlow(data)
+        loss, ll, unweighted_lnorm = pyramid_loss(pyramid_steps, pyramid_steps_lnorm)
 
         loss.backward()
         #if batch_idx > 881 and False:
@@ -58,11 +54,11 @@ def train(epoch):
                 visualize(loss, pyrFlow)
 
             #printt(str(batch_idx), pyrFlow.parameters())
-            individual_loss = f" Prior: {-prior.mean().item() / BITS_PER_DIM_NORM:.5f} " \
-                              f"norm: {-norm.mean().item() / BITS_PER_DIM_NORM:.5f}"
+            individual_loss = f" nll: {ll.item() / BITS_PER_DIM_NORM:.5f} " \
+                              f"norm: {unweighted_lnorm.item() / BITS_PER_DIM_NORM:.5f}"
             percentage = 100. * batch_idx / len(train_loader)
             print(f'Train Epoch: {epoch} [{batch_idx * len(data)}/{len(train_loader.dataset)} ({percentage:.0f}%)]'
-                  f'\tbits/dim - Loss: {loss.item() / BITS_PER_DIM_NORM:.5f} ' + individual_loss)
+                  f'\tweighted Loss: {loss.item():.5f} bits/dim:' + individual_loss)
 
             if batch_idx % (LOG_INTERVAL*3) == 0:
                 max_val = max([steps.abs().max() for steps in pyramid_steps])

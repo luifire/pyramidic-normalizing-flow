@@ -19,7 +19,7 @@ class PyramidFlowModel(LayerModule):
         channel_size = KERNEL_SIZE_SQ * PIXEL_DEPTH
         bundle_size = channel_size # s.t. every pixel consists of all others
         bundle_size = KERNEL_SIZE_SQ
-        #bundle_size = 2
+        #bundle_size = 1
         #bundle_size = 2
         bundle_size_2 = KERNEL_SIZE_SQ
         #bundle_size_2 = 2
@@ -28,10 +28,12 @@ class PyramidFlowModel(LayerModule):
                                                jump_over_pixels=True))
 
         self.layer_list.append(InvertiblePolynome())
+
         self.layer_list.append(SLogGate())
         self.layer_list.append(DepthConvBundle("2", channel_count=channel_size, bundle_size=bundle_size_2,
                                                jump_over_pixels=True))
         self.layer_list.append(InvertiblePolynome())
+
         #self.layer_list.append(SLogGate())
 
         #self.layer_list.append(CutOff(channel_size // 2))
@@ -40,18 +42,26 @@ class PyramidFlowModel(LayerModule):
         
     def forward(self, x):
         pyramid_steps = []
+        pyramid_steps_lnorm = []
+
         x = initialReshaping(x)
+        lnorm_map = torch.zeros_like(x, device=DEVICE)
         log_norm = torch.zeros(x.shape[0], device=DEVICE)
         for layer in self.layer_list:
             if type(layer) is CutOff:
                 x, cut_off = layer(x)
                 pyramid_steps.append(cut_off)
-            else: # normal procedure
-                x, x_log_norm = layer(x)
-                log_norm += x_log_norm
 
+                lnorm_map, cut_off_lnorm_map = layer(lnorm_map)
+                pyramid_steps_lnorm.append(cut_off_lnorm_map)
+            else: # normal procedure
+                x, lnorm_map = layer(x, lnorm_map)
+                #log_norm += x_log_norm
+        # top data needs to be appended to the pyramid
         pyramid_steps.append(x)
-        return pyramid_steps, log_norm
+        pyramid_steps_lnorm.append(lnorm_map)
+
+        return pyramid_steps, pyramid_steps_lnorm
 
     def print_parameter(self):
         for layer in self.layer_list:

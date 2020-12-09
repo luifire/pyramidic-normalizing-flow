@@ -25,17 +25,17 @@ class DepthConvBundle(LayerModule):
             self.bundle.append(DepthConv(name=conv_name, channel_count=channel_count,
                                          jump_over_pixels=jump_over_pixels, pixel_idx=i))
 
-    def __call__(self, x):
-        logd_norm_sums = torch.zeros(x.shape[BATCH_DIM], device=DEVICE)
+    def __call__(self, x, lnorm_map):
+        #logd_norm_sums = torch.zeros(x.shape[BATCH_DIM], device=DEVICE)
         for i, layer in enumerate(self.bundle):
-            x, log_norm = layer(x)
-            logd_norm_sums = logd_norm_sums.add(log_norm)
+            x, lnorm_map = layer(x, lnorm_map)
+            #logd_norm_sums = logd_norm_sums.add(log_norm)
             x = self.channel_shifter(x)
-
+            lnorm_map = self.channel_shifter(lnorm_map)
             #x = self.channel_shifter(x)
         #logd_norm_sum = self.logd_norms.sum()
         #self.logd_norms
-        return x, logd_norm_sums
+        return x, lnorm_map
 
     def print_parameter(self):
         for layer in self.bundle:

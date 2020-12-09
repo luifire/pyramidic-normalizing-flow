@@ -42,8 +42,9 @@ class DataSet(Enum):
 
 
 TRAIN_DATA_SET = DataSet.CIFAR
-#TRAIN_DATA_SET = DataSet.MNIST
+TRAIN_DATA_SET = DataSet.MNIST
 #TEST_DATA_SET = DataSet.SVHN
+DOWNLOAD = False
 
 STATE_DIR = f'../model_state/{TRAIN_DATA_SET.name}/'
 
@@ -64,7 +65,6 @@ TOTAL_IMAGE_DIMENSION = DATA_WIDTH * DATA_HEIGHT * PIXEL_DEPTH
 
 # from Kirichenko
 BITS_PER_DIM_NORM = np.log(2) * TOTAL_IMAGE_DIMENSION
-
 
 def _printt(name, var):
     print(name + ": " + str(var))

@@ -42,7 +42,7 @@ class InvertiblePolynome(LayerModule):
         #printt("hole_filler", hole_filler)
         return self.holed_shift_matrix, self.hole_filler_vector
 
-    def forward(self, x: torch.Tensor):
+    def forward(self, x: torch.Tensor, lnorm_map):
         # an example for why this is correct is in misc.test_polynomes
         original_shape = x.shape
         #flat = x.flatten(1, -1)
@@ -62,8 +62,12 @@ class InvertiblePolynome(LayerModule):
         #printt("x danach", x[0, 1:2,4])
 
         # sum log |x|
-        logd_det = multiplier.abs().log().sum(1).sum(1).sum(1)
+        #logd_det = multiplier.abs().log().sum(1).sum(1).sum(1)
+
+        lnorm_map += multiplier.abs().log()
+
         # revert order
         x = torch.flip(x, [CHANNEL_DIM])
+        lnorm_map = torch.flip(lnorm_map, [CHANNEL_DIM])
 
-        return x, logd_det
+        return x, lnorm_map

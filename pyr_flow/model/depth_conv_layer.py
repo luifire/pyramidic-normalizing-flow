@@ -39,6 +39,7 @@ class DepthConv(LayerModule):
     def create_identity_part(self, pixel_idx):
         # not relevant here
         if pixel_idx == 0:
+            self.non_updatable_parameters = 0
             self.identity_start = 0
             return
 
@@ -53,6 +54,9 @@ class DepthConv(LayerModule):
 
         identity = torch.eye(self.channel_count, device=DEVICE)
         self.identity_keeper_sub_matrix = identity[pixel_start:pixel_end]
+
+        n = pixel_end - pixel_start
+        self.non_updatable_parameters = 0.5 * (n**2 + n)
         #printt("keep_identity", self.identity_keeper_sub_matrix)
 
     def _prepare_weight_matrix_and_norm(self):
@@ -78,11 +82,12 @@ class DepthConv(LayerModule):
 
             print("diag has zeros")
 
-        logd_det = diag.abs().log().sum()
+        #logd_det = diag.abs().log().sum()
+        logd_det = diag.abs().log()
 
         return weights, logd_det
 
-    def forward(self, x : torch.Tensor):
+    def forward(self, x : torch.Tensor, lnorm_map):
         _, height, width, _ = x.shape
 
         conv_matrix, logd_det = self._prepare_weight_matrix_and_norm()
@@ -95,13 +100,14 @@ class DepthConv(LayerModule):
         #x = channel_normal_position(x)
 
         # TODO speedup
-        amount_of_convolutions = height * width
+        #amount_of_convolutions = height * width
         # |det| == |det(Kernel)^amount_of_convolutions|
         # Note that the power part ccan be done like this
         # log(|a^b|) = log(|a|^b) = b log(|a|)
-        total_logd_det = logd_det * amount_of_convolutions
+        #total_logd_det = logd_det * amount_of_convolutions
 
-        return x, total_logd_det
+        lnorm_map += logd_det
+        return x, lnorm_map
 
     def print_parameter(self):
         w = self.weights
@@ -111,4 +117,4 @@ class DepthConv(LayerModule):
 
     def get_parameter_count(self):
         dim = self.weights.shape[0]
-        return (dim ** 2 + dim) / 2
+        return (dim ** 2 + dim) / 2 - self.non_updatable_parameters

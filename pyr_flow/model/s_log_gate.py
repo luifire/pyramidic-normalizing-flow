@@ -16,19 +16,23 @@ class SLogGate(LayerModule):
         #self.alpha = nn.Parameter(torch.tensor(0.01, device=DEVICE))
         self.alpha = nn.Parameter(torch.tensor(0.1, device=DEVICE)) # exp(alpha) ~= 0.01
 
-    def forward(self, x: torch.Tensor):
+    def forward(self, x: torch.Tensor, lnorm_map):
         # alpha should be positive
         #positive_alpha = self.alpha.exp()
-        warn("if nan should occure, it could be because of this alpha")
+        #warn("if nan should occure, it could be because of this alpha")
         positive_alpha = self.alpha
         x_abs = x.abs()
         #sign(x)/a * (exp(a |x|) -1)
         bracket = (positive_alpha * x_abs).exp() - 1
-        y = x.sign() / positive_alpha * bracket
+        x = x.sign() / positive_alpha * bracket
 
-        normalization = positive_alpha * x_abs
-        total_norm = normalization.sum(1).sum(1).sum(1)
-        return y, total_norm
+        lnorm_map += positive_alpha * x_abs
+        return x, lnorm_map
+
+        #normalization = positive_alpha * x_abs
+        #total_norm = normalization.sum(1).sum(1).sum(1)
+
+        #return y, total_norm
 
     # I think this was the inverse ^^"
     def forward_(self, x: torch.Tensor):

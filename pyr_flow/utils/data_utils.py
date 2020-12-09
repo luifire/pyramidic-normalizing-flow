@@ -23,8 +23,8 @@ def load_dataset(dataset) -> (torch.utils.data.DataLoader, torch.utils.data.Data
             torchvision.transforms.Pad([0, 0, 2, 2], padding_mode='edge'),
         ])
 
-        data_train = torchvision.datasets.MNIST('/files/', train=True, download=True, transform=transformation)
-        data_test = torchvision.datasets.MNIST('/files/', train=False, download=True, transform=transformation)
+        data_train = torchvision.datasets.MNIST('/files/', train=True, download=DOWNLOAD, transform=transformation)
+        data_test = torchvision.datasets.MNIST('/files/', train=False, download=DOWNLOAD, transform=transformation)
     elif dataset == DataSet.CIFAR:
         #32x32
         transformation = torchvision.transforms.Compose([
@@ -33,8 +33,8 @@ def load_dataset(dataset) -> (torch.utils.data.DataLoader, torch.utils.data.Data
             torchvision.transforms.Pad([0, 0, 1, 1], padding_mode='edge'),
         ])
 
-        data_train = torchvision.datasets.CIFAR10('/files/', train=True, download=True, transform=transformation)
-        data_test = torchvision.datasets.CIFAR10('/files/', train=False, download=True, transform=transformation)
+        data_train = torchvision.datasets.CIFAR10('/files/', train=True, download=DOWNLOAD, transform=transformation)
+        data_test = torchvision.datasets.CIFAR10('/files/', train=False, download=DOWNLOAD, transform=transformation)
     else:
         raise Exception("Ups!")
 

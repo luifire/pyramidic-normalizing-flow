@@ -30,7 +30,6 @@ class ChannelShifter(LayerModule):
 
     def forward(self, x : torch.Tensor):
         #x = channel_to_last_dim(x)
-        warn("there is probably sth wrong")
         x = x.matmul(self.shift_matrix)
         #x = channel_normal_position(x)
 
