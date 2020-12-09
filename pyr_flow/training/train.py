@@ -58,16 +58,16 @@ def train(epoch):
                 visualize(loss, pyrFlow)
 
             #printt(str(batch_idx), pyrFlow.parameters())
-            individual_loss = f" Prior: {-prior.mean().item() / BITS_PER_DIM_NORM:.3f} " \
-                              f"norm: {-norm.mean().item() / BITS_PER_DIM_NORM:.3f}"
+            individual_loss = f" Prior: {-prior.mean().item() / BITS_PER_DIM_NORM:.5f} " \
+                              f"norm: {-norm.mean().item() / BITS_PER_DIM_NORM:.5f}"
             percentage = 100. * batch_idx / len(train_loader)
             print(f'Train Epoch: {epoch} [{batch_idx * len(data)}/{len(train_loader.dataset)} ({percentage:.0f}%)]'
-                  f'\tLoss: {loss.item() / BITS_PER_DIM_NORM:.3f} bits/dim' + individual_loss)
+                  f'\tbits/dim - Loss: {loss.item() / BITS_PER_DIM_NORM:.5f} ' + individual_loss)
 
             if batch_idx % (LOG_INTERVAL*3) == 0:
                 max_val = max([steps.abs().max() for steps in pyramid_steps])
                 min_val = min([steps.abs().min() for steps in pyramid_steps])
-                print(f'Prior Domain Max {max_val:.3f} Min {min_val:.3f}')
+                print(f'Prior Domain Max {max_val:.5f} Min {min_val:.5f}')
                 # TODO check std dev
             #train_losses.append(loss.item())
             #train_counter.append((batch_idx*64) + ((epoch-1)*len(train_loader.dataset)))
@@ -76,7 +76,7 @@ for epoch in range(1, N_EPOCHS + 1):
     pyrFlow.print_parameter()
     if epoch % EVAL_INTERVAL == 0:
         eval_loss = evaluation.eval_on_normal_test_set(pyrFlow, pyramid_loss, TOTAL_IMAGE_DIMENSION)
-        name = f'{epoch} - loss - {eval_loss:.3f}'
+        name = f'{epoch} - loss - {eval_loss:.5f}'
 
         torch.save(pyrFlow.state_dict(), f'{STATE_DIR}/{name}.model')
         torch.save(optimizer.state_dict(), f'{STATE_DIR}/{name}.optimizer')

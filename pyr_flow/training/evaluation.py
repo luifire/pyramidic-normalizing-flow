@@ -32,7 +32,7 @@ class Evaluation():
         prior_avg /= loss_norming
         norm_avg /= loss_norming
         print('*******************')
-        print(f'Evaluation loss: {loss_avg:.3f} Prior: {prior_avg:.3f} Norm: {norm_avg:.3f}')
+        print(f'Evaluation loss: {loss_avg:.5f} Prior: {prior_avg:.5f} Norm: {norm_avg:.5f}')
         print('*******************')
 
         return loss_avg

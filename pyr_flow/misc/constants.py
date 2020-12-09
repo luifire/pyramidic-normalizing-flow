@@ -34,6 +34,7 @@ torch.backends.cudnn.deterministic = True
 torch.set_printoptions(linewidth=130)
 #torch.set_default_tensor_type(torch.DoubleTensor)
 
+
 class DataSet(Enum):
     MNIST = 1
     CIFAR = 2

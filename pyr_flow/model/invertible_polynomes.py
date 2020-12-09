@@ -63,7 +63,7 @@ class InvertiblePolynome(LayerModule):
 
         # sum log |x|
         logd_det = multiplier.abs().log().sum(1).sum(1).sum(1)
-
-        #x = x.reshape(original_shape)
+        # revert order
+        x = torch.flip(x, [CHANNEL_DIM])
 
         return x, logd_det

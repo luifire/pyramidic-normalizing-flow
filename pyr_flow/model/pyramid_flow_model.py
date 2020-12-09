@@ -19,24 +19,22 @@ class PyramidFlowModel(LayerModule):
         channel_size = KERNEL_SIZE_SQ * PIXEL_DEPTH
         bundle_size = channel_size # s.t. every pixel consists of all others
         bundle_size = KERNEL_SIZE_SQ
-        bundle_size = 2
         #bundle_size = 2
-        bundle_size_2 = 2
+        #bundle_size = 2
+        bundle_size_2 = KERNEL_SIZE_SQ
+        #bundle_size_2 = 2
         #channel_size = 1 # warn
         self.layer_list.append(DepthConvBundle("1", channel_count=channel_size, bundle_size=bundle_size,
                                                jump_over_pixels=True))
 
-        self.layer_list.append(SLogGate())
         self.layer_list.append(InvertiblePolynome())
+        self.layer_list.append(SLogGate())
         self.layer_list.append(DepthConvBundle("2", channel_count=channel_size, bundle_size=bundle_size_2,
                                                jump_over_pixels=True))
-        self.layer_list.append(SLogGate())
         self.layer_list.append(InvertiblePolynome())
+        #self.layer_list.append(SLogGate())
 
-        #self.layer_list.append(InvertiblePolynome())
-        """
         #self.layer_list.append(CutOff(channel_size // 2))
-        """
         #self.layer_list.append(DepthConvBundle("3", channel_count=channel_size, bundle_size=bundle_size,
         #                                   jump_over_pixels=True))
         
