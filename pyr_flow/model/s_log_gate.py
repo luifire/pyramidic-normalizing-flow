@@ -28,7 +28,6 @@ class SLogGate(LayerModule):
 
         normalization = positive_alpha * x_abs
         total_norm = normalization.sum(1).sum(1).sum(1)
-
         return y, total_norm
 
     # I think this was the inverse ^^"

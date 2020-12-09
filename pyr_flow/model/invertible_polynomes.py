@@ -7,7 +7,7 @@ from misc.misc import *
 from misc.constants import *
 from model.layer_module import LayerModule
 
-from torch_helper.functional_stuff import get_shift_matrix
+from utils.functional_utils import get_shift_matrix
 
 
 class InvertiblePolynome(LayerModule):

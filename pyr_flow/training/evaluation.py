@@ -1,3 +1,5 @@
+from misc.constants import *
+
 class Evaluation():
 
     def __init__(self, test_loader):
@@ -24,12 +26,13 @@ class Evaluation():
             prior_avg += -prior.mean().item()
             norm_avg += -norm.mean().item()
 
-        loss_norming = len(self.test_loader) * pixel_count
+        # make average (/N) and make bits per dim
+        loss_norming = len(self.test_loader) * BITS_PER_DIM_NORM
         loss_avg /= loss_norming
         prior_avg /= loss_norming
         norm_avg /= loss_norming
         print('*******************')
-        print(f'Evaluation loss: {loss_avg} Prior: {prior_avg} Norm: {norm_avg}')
+        print(f'Evaluation loss: {loss_avg:.3f} Prior: {prior_avg:.3f} Norm: {norm_avg:.3f}')
         print('*******************')
 
         return loss_avg

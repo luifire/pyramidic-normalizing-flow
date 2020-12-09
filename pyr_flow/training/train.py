@@ -6,11 +6,11 @@ from model.pyramid_loss import PyramidLoss
 
 from misc.misc import *
 from misc.constants import *
-from torch_helper import data_stuff
+from utils import data_utils, training_utils
 from training.evaluation import Evaluation
 
 # DATA
-train_loader, test_loader = data_stuff.load_dataset(TRAIN_DATA_SET)
+train_loader, test_loader = data_utils.load_dataset(TRAIN_DATA_SET)
 # EVALUATION
 evaluation = Evaluation(test_loader)
 
@@ -49,7 +49,7 @@ def train(epoch):
         #    printt("grad", pyrFlow.conv_1.bundle[0].weights.grad)
 
         # TODO: clip gradient
-        #utils.clip_grad_norm(optimizer, max_grad_norm)
+        training_utils.clip_grad_norm(optimizer, MAX_GRAD_NORM)
 
         optimizer.step()
 
@@ -58,11 +58,11 @@ def train(epoch):
                 visualize(loss, pyrFlow)
 
             #printt(str(batch_idx), pyrFlow.parameters())
-            individual_loss = f" Prior: {-prior.mean().item() / TOTAL_IMAGE_DIMENSION:.3f} " \
-                              f"norm: {-norm.mean().item() / TOTAL_IMAGE_DIMENSION:.3f}"
+            individual_loss = f" Prior: {-prior.mean().item() / BITS_PER_DIM_NORM:.3f} " \
+                              f"norm: {-norm.mean().item() / BITS_PER_DIM_NORM:.3f}"
             percentage = 100. * batch_idx / len(train_loader)
             print(f'Train Epoch: {epoch} [{batch_idx * len(data)}/{len(train_loader.dataset)} ({percentage:.0f}%)]'
-                  f'\tLoss: {loss.item() / TOTAL_IMAGE_DIMENSION:.3f} bits/dim' + individual_loss)
+                  f'\tLoss: {loss.item() / BITS_PER_DIM_NORM:.3f} bits/dim' + individual_loss)
 
             if batch_idx % (LOG_INTERVAL*3) == 0:
                 max_val = max([steps.abs().max() for steps in pyramid_steps])

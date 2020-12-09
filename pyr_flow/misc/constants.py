@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 from enum import Enum
 
 DEVICE = torch.device("cuda:0")
@@ -24,6 +25,7 @@ LEARNING_RATE = 1e-4
 WEIGHT_DECAY = 5e-5
 LOG_INTERVAL = 100
 EVAL_INTERVAL = 5 # every epoches
+MAX_GRAD_NORM = 100
 
 RANDOM_SEED = 1337
 torch.manual_seed(RANDOM_SEED)
@@ -58,6 +60,10 @@ else:
     raise Exception("uncovered")
 
 TOTAL_IMAGE_DIMENSION = DATA_WIDTH * DATA_HEIGHT * PIXEL_DEPTH
+
+# from Kirichenko
+BITS_PER_DIM_NORM = np.log(2) * TOTAL_IMAGE_DIMENSION
+
 
 def _printt(name, var):
     print(name + ": " + str(var))
