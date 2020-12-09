@@ -1,10 +1,10 @@
-from model.depth_conv_layer import *
-from model.initial_reshaping import initialReshaping
-from model.s_log_gate import SLogGate
+from model.computation_layers.depth_conv_layer import *
+from model.reshaping.initial_reshaping import initialReshaping
+from model.computation_layers.s_log_gate import SLogGate
 from model.layer_module import LayerModule
-from model.cut_off_layer import CutOff
-from model.conv_bundle import DepthConvBundle
-from model.invertible_polynomes import InvertiblePolynome
+from model.reshaping.cut_off_layer import CutOff
+from model.computation_layers.conv_bundle import DepthConvBundle
+from model.computation_layers.invertible_polynomes import InvertiblePolynome
 
 from misc.constants import *
 
@@ -24,6 +24,7 @@ class PyramidFlowModel(LayerModule):
         bundle_size_2 = KERNEL_SIZE_SQ
         #bundle_size_2 = 2
         #channel_size = 1 # warn
+        """
         self.layer_list.append(DepthConvBundle("1", channel_count=channel_size, bundle_size=bundle_size,
                                                jump_over_pixels=True))
 
@@ -33,6 +34,25 @@ class PyramidFlowModel(LayerModule):
         self.layer_list.append(DepthConvBundle("2", channel_count=channel_size, bundle_size=bundle_size_2,
                                                jump_over_pixels=True))
         self.layer_list.append(InvertiblePolynome())
+        """
+        #self.layer_list.append(CutOff(channel_size))
+
+        n_bundle = 1
+        while channel_size > 3:
+            bundle_size_1 = bundle_size_2 = channel_size // PIXEL_DEPTH
+            self.layer_list.append(DepthConvBundle(n_bundle, channel_count=channel_size, bundle_size=bundle_size_1,
+                                                   jump_over_pixels=True))
+            n_bundle += 1
+            self.layer_list.append(InvertiblePolynome())
+
+            self.layer_list.append(SLogGate())
+            self.layer_list.append(DepthConvBundle(n_bundle, channel_count=channel_size, bundle_size=bundle_size_2,
+                                                   jump_over_pixels=True))
+            n_bundle += 1
+            self.layer_list.append(InvertiblePolynome())
+
+            self.layer_list.append(CutOff(remove_channel_count=channel_size // 2))
+            channel_size = channel_size // 2 + 1
 
         #self.layer_list.append(SLogGate())
 

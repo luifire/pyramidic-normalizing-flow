@@ -5,7 +5,7 @@ from misc.constants import *
 from misc.misc import *
 
 
-def initialReshaping(x):
+def _initialReshaping(x):
     batch_size, channel_count, height, width = x.shape
 
     assert width % KERNEL_SIZE == 0

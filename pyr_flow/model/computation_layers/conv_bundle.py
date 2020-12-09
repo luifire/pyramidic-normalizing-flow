@@ -1,27 +1,25 @@
 import torch.nn as nn
-import torch
 
-from model.shift_channel_layer import ChannelShifter
+from model.reshaping.shift_channel_layer import ChannelShifter
 from model.layer_module import LayerModule
 
-from misc.misc import *
 from misc.constants import *
-from model.depth_conv_layer import DepthConv
+from model.computation_layers.depth_conv_layer import DepthConv
 
 
 class DepthConvBundle(LayerModule):
 
     """ jump_over_pixels : if true, then for rotation we rotate over them (in channel shifter)"""
-    def __init__(self, name, channel_count, bundle_size, jump_over_pixels):
+    def __init__(self, id, channel_count, bundle_size, jump_over_pixels):
         super().__init__()
         self.bundle = nn.ModuleList()
-        self.name = name
+        self.name = str(id)
         self.channel_shifter = ChannelShifter(channel_count, jump_over_pixels)
-        bias = torch.normal(mean=1.5, std=0.5, size=[channel_count], device=DEVICE)
+        bias = torch.normal(mean=0, std=0.5, size=[channel_count], device=DEVICE)
         self.bias = nn.Parameter(bias, requires_grad=True)  # nn.Parameter is a Tensor that's a module parameter.
 
         for i in range(bundle_size):
-            conv_name = "Bundle " + name + " Conv " + str(i)
+            conv_name = "Bundle " + self.name + " Conv " + str(i)
             self.bundle.append(DepthConv(name=conv_name, channel_count=channel_count,
                                          jump_over_pixels=jump_over_pixels, pixel_idx=i))
 

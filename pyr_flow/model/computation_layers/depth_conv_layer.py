@@ -1,7 +1,5 @@
 import torch.nn as nn
-import torch
 
-from model.shift_channel_layer import ChannelShifter
 from model.layer_module import LayerModule
 
 from misc.misc import *

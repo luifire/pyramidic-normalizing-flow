@@ -1,7 +1,7 @@
 import torch.optim as optim
 
 from model.pyramid_flow_model import PyramidFlowModel
-from model.pyramid_loss import PyramidLoss
+from model.computation_layers.pyramid_loss import PyramidLoss
 
 from misc.misc import *
 from misc.constants import *
