@@ -74,12 +74,16 @@ class PyramidLoss(nn.Module):
         print('0 is most important\n')
         print('Note: that we do: weight * log(p(Size))/Size = weight (log(p(1)) +...+log(p(size))/size')
         pyramid_steps = reversed(pyramid_steps)
+        size_sum = 0
         for i, step in enumerate(pyramid_steps):
             step = step[0] # ignore batch
             step = step.reshape(-1)
             weight = 1 / (PYRAMID_STEP_WEIGHTING ** i)
             size = step.shape[0]
             print(f'step {i} size: {size} weight: {weight:.4f}\t')
+            size_sum += size
+
+        print(f'Sum(size) = {size_sum} total image dimension {TOTAL_IMAGE_DIMENSION}')
 
         print(f'Amount of Log Gates: {SLogGate.log_gate_count}')
         print_separator()

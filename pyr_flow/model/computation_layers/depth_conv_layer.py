@@ -72,7 +72,6 @@ class DepthConv(LayerModule):
         return weights, logd_det
 
     def forward(self, x : torch.Tensor, lnorm_map):
-        #print(f'{self.name} {x.shape}')
         _, height, width, _ = x.shape
 
         """
@@ -82,8 +81,15 @@ class DepthConv(LayerModule):
         if torch.isinf(self.weights).any():
             print("IIIIIIIIINF")
             print(self.name)
+            
+        print(x.shape)
+        print(conv_matrix.shape)
+        print(self.internal_pixel_depth)
+        print(self.total_pixel_depth)
+        print(self.name)
         """
         conv_matrix, logd_det = self._prepare_weight_matrix_and_norm()
+
         x = x.matmul(conv_matrix)
 
         # |det| == |det(Kernel)^amount_of_convolutions|

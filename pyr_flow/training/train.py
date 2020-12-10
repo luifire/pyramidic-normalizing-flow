@@ -9,6 +9,8 @@ from utils import data_utils, training_utils
 from training.evaluation import Evaluation
 
 
+print_constants()
+
 # DATA
 train_loader, test_loader = data_utils.load_dataset(TRAIN_DATA_SET)
 # EVALUATION
@@ -53,7 +55,10 @@ def train(epoch):
 
         if batch_idx % LOG_INTERVAL == 0:
             if epoch == 0 and batch_idx == 0:
-                create_flow_graph(loss, pyrFlow)
+                try:
+                    create_flow_graph(loss, pyrFlow)
+                except RecursionError:
+                    warn("Couldn't draw graph. Too many recursions")
                 PyramidLoss.print_loss_size(pyramid_steps)
 
             #printt(str(batch_idx), pyrFlow.parameters())
@@ -73,7 +78,6 @@ def train(epoch):
             #train_counter.append((batch_idx*64) + ((epoch-1)*len(train_loader.dataset)))
 
 for epoch in range(N_EPOCHS):
-    pyrFlow.print_parameter()
     if (epoch + 1) % EVAL_INTERVAL == 0:
         eval_loss = evaluation.eval_on_normal_test_set(pyrFlow, pyramid_loss, TOTAL_IMAGE_DIMENSION)
         name = f'{epoch} - loss - {eval_loss:.5f}'
@@ -82,3 +86,4 @@ for epoch in range(N_EPOCHS):
         torch.save(optimizer.state_dict(), f'{STATE_DIR}/{name}.optimizer')
 
     train(epoch)
+    pyrFlow.print_parameter()

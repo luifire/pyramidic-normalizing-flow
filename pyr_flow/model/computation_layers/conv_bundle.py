@@ -12,7 +12,7 @@ class DepthConvBundle(LayerModule):
 
     """ jump_over_pixels : if true, then for rotation we rotate over them (in channel shifter)"""
     """ if bundle_size <= 0, it will be ignored and the complete thing will be iterated"""
-    def __init__(self, total_pixel_depth, internal_pixel_depth, bundle_size, jump_over_pixels):
+    def __init__(self, total_pixel_depth, internal_pixel_depth, jump_over_pixels, bundle_size=-1):
         super().__init__()
 
         self.bundle = nn.ModuleList()

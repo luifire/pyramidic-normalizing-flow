@@ -112,3 +112,15 @@ def clean_up_dir():
 
 def print_separator():
     print('##########################################################################\n')
+
+
+def print_constants():
+    def _printt(name, var):
+        print(name + ": " + str(var))
+
+    _printt("learning_rate", LEARNING_RATE)
+    _printt("batch_size_train", BATCH_SIZE_TRAIN)
+    _printt("weight_decay", WEIGHT_DECAY)
+    _printt("Dat Set", TRAIN_DATA_SET)
+    _printt("Data Size", DATA_WIDTH*DATA_HEIGHT)
+    _printt("Device", DEVICE)

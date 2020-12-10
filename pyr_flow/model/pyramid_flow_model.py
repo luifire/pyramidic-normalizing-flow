@@ -45,28 +45,45 @@ class PyramidFlowModel(LayerModule):
         for step in range(self.compute_halveableness()):
             self.layer_list.append(DepthConvBundle(total_pixel_depth=total_pixel_depth,
                                                    internal_pixel_depth=internal_pixel_depth,
-                                                   bundle_size=-1,
                                                    jump_over_pixels=True))
             self.layer_list.append(InvertiblePolynome())
 
             self.layer_list.append(SLogGate())
             self.layer_list.append(DepthConvBundle(total_pixel_depth=total_pixel_depth,
-                                                   bundle_size=-1,
                                                    internal_pixel_depth=internal_pixel_depth,
                                                    jump_over_pixels=True))
             self.layer_list.append(InvertiblePolynome())
 
-            self.layer_list.append(CutOff(remove_channel_count=total_pixel_depth // 2))
+            total_pixel_depth = total_pixel_depth // 2# + total_pixel_depth % 2
+            self.layer_list.append(CutOff(remaining_depth=total_pixel_depth))
 
-            total_pixel_depth = total_pixel_depth // 2 + total_pixel_depth % 2
             self.layer_list.append(CombineNeighbors())
 
             internal_pixel_depth = total_pixel_depth
             total_pixel_depth = total_pixel_depth * COMBINE_NEIGHBOR_KERNEL_SIZE_SQ
 
+        print('####Last Pixel Stuff:')
+        # last pixel
         # for the last 'pixel' we, make some extra computation
+        while total_pixel_depth > LAST_PIXEL_BREAK_DOWN:
+            self.layer_list.append(DepthConvBundle(total_pixel_depth=total_pixel_depth,
+                                                   internal_pixel_depth=1,
+                                                   jump_over_pixels=False))
+            self.layer_list.append(InvertiblePolynome())
+
+            self.layer_list.append(SLogGate())
+            """
+            self.layer_list.append(DepthConvBundle(total_pixel_depth=total_pixel_depth,
+                                                   internal_pixel_depth=1,
+                                                   jump_over_pixels=False))
+            self.layer_list.append(InvertiblePolynome())
+            """
+            total_pixel_depth = total_pixel_depth // LAST_PIXEL_BREAK_DOWN
+            self.layer_list.append(CutOff(remaining_depth=total_pixel_depth))
 
         print_separator()
+
+
     @staticmethod
     def compute_halveableness():
         width = DATA_WIDTH // INITIAL_KERNEL_SIZE

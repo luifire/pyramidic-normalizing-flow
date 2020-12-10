@@ -10,19 +10,18 @@ class CutOff(LayerModule):
     """
     remove_pixel_count - if a pixel has 3 values (RGB) we remove 3 values!
     """
-    def __init__(self, remove_channel_count):
+    def __init__(self, remaining_depth):
         super().__init__()
 
-        self.remove_dimension_count = remove_channel_count
+        self.remaining_depth = remaining_depth
         # dummy registration
         self.dummy = nn.Parameter(torch.zeros(1, device=DEVICE), requires_grad=False)
 
-        print(f'Cut off last {self.remove_dimension_count}: dimensions')
+        print(f'Cut Off - Remaining Depth {remaining_depth}')
 
     def forward(self, x):
-        channel_count = x.shape[CHANNEL_DIM]
-        remains = x[:,:,:,0:channel_count - self.remove_dimension_count]
-        cut_off = x[:,:,:,self.remove_dimension_count:]
+        remains = x[:,:,:,0:self.remaining_depth]
+        cut_off = x[:,:,:,self.remaining_depth:]
 
         return remains, cut_off
 
