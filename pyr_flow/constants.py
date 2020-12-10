@@ -47,7 +47,7 @@ class DataSet(Enum):
 
 
 TRAIN_DATA_SET = DataSet.CIFAR
-TRAIN_DATA_SET = DataSet.MNIST
+#TRAIN_DATA_SET = DataSet.MNIST
 #TEST_DATA_SET = DataSet.SVHN
 DOWNLOAD = False
 

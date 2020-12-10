@@ -49,11 +49,13 @@ class PyramidFlowModel(LayerModule):
             self.layer_list.append(InvertiblePolynome())
 
             self.layer_list.append(SLogGate())
+            """
             self.layer_list.append(DepthConvBundle(total_pixel_depth=total_pixel_depth,
                                                    internal_pixel_depth=internal_pixel_depth,
                                                    jump_over_pixels=True))
+            
             self.layer_list.append(InvertiblePolynome())
-
+            """
             total_pixel_depth = total_pixel_depth // 2# + total_pixel_depth % 2
             self.layer_list.append(CutOff(remaining_depth=total_pixel_depth))
 
@@ -66,16 +68,20 @@ class PyramidFlowModel(LayerModule):
         # last pixel
         # for the last 'pixel' we, make some extra computation
         while total_pixel_depth > LAST_PIXEL_BREAK_DOWN:
+            pixel_jumper = 1
+            if total_pixel_depth > 50:
+                pixel_jumper = total_pixel_depth // 2
+
             self.layer_list.append(DepthConvBundle(total_pixel_depth=total_pixel_depth,
-                                                   internal_pixel_depth=1,
-                                                   jump_over_pixels=False))
+                                                   internal_pixel_depth=pixel_jumper,
+                                                   jump_over_pixels=True))
             self.layer_list.append(InvertiblePolynome())
 
             self.layer_list.append(SLogGate())
             """
             self.layer_list.append(DepthConvBundle(total_pixel_depth=total_pixel_depth,
-                                                   internal_pixel_depth=1,
-                                                   jump_over_pixels=False))
+                                                   internal_pixel_depth=pixel_jumper,
+                                                   jump_over_pixels=True))
             self.layer_list.append(InvertiblePolynome())
             """
             total_pixel_depth = total_pixel_depth // LAST_PIXEL_BREAK_DOWN
@@ -83,6 +89,15 @@ class PyramidFlowModel(LayerModule):
 
         print_separator()
 
+    @staticmethod
+    def _estimate_pixel_jumper(total_pixel_depth):
+        if total_pixel_depth > 5:
+            pixel_jumper = total_pixel_depth // 20
+
+
+        if total_pixel_depth > 50:
+            pixel_jumper = int(np.floor(np.sqrt(total_pixel_depth)))
+            pixel_jumper = total_pixel_depth // 10
 
     @staticmethod
     def compute_halveableness():

@@ -39,11 +39,11 @@ class DepthConvBundle(LayerModule):
                                          pixel_idx=i))
 
         print(f'Conv Bundle {self.name} - Size: {true_bundle_size} total_pixel_depth: {total_pixel_depth} '
-              f'internal_pixel_depth: {internal_pixel_depth} jump_over_pixels {jump_over_pixels}')
+              f'internal_pixel_depth: {internal_pixel_depth} jump_over_pixels :{jump_over_pixels} |'
+              f'param count: {self.get_parameter_count()}')
 
     @staticmethod
     def _compute_actual_bundle_size(bundle_size, total_pixel_depth, internal_pixel_depth, jump_over_pixels):
-        res = -1
         if bundle_size <= 0:
             if jump_over_pixels:
                 res = total_pixel_depth // internal_pixel_depth

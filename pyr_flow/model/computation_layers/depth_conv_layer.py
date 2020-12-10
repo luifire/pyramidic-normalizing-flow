@@ -24,7 +24,7 @@ class DepthConv(LayerModule):
         self.identity_keeper_sub_matrix = None
 
         # Weight init kind of suggested by invertible conv flow
-        weights = torch.normal(mean=0, std=0.01, size=[total_pixel_depth, total_pixel_depth], device=DEVICE)
+        weights = torch.normal(mean=0, std=0.0001, size=[total_pixel_depth, total_pixel_depth], device=DEVICE)
         weights += torch.eye(total_pixel_depth, device=DEVICE)
 
         self.weights = nn.Parameter(weights, requires_grad=True)

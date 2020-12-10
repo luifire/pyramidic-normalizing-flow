@@ -12,7 +12,7 @@ class ChannelShifter(LayerModule):
     def __init__(self, internal_pixel_depth, total_pixel_depth, jump_over_pixels):
         super().__init__()
 
-        shift_by = 1 if jump_over_pixels is False else internal_pixel_depth
+        shift_by = internal_pixel_depth if jump_over_pixels else 1
         self.shift_matrix = get_shift_matrix(total_pixel_depth, shift_by)
 
         self.dummy = nn.Parameter(torch.zeros(1, device=DEVICE), requires_grad=False)
