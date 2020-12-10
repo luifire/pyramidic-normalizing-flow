@@ -4,9 +4,10 @@ from model.pyramid_flow_model import PyramidFlowModel
 from model.computation_layers.pyramid_loss import PyramidLoss
 
 from misc.misc import *
-from misc.constants import *
+from constants import *
 from utils import data_utils, training_utils
 from training.evaluation import Evaluation
+
 
 # DATA
 train_loader, test_loader = data_utils.load_dataset(TRAIN_DATA_SET)
@@ -28,7 +29,7 @@ def train(epoch):
     pyrFlow.train()
     global Batch_Idx
     for batch_idx, (data, target) in enumerate(train_loader):
-        Batch_Idx = batch_idx
+        Batch_Idx += 1
         data = data.to(DEVICE)
 
         #plot_data(data)
@@ -37,7 +38,7 @@ def train(epoch):
         optimizer.zero_grad()
 
         pyramid_steps, pyramid_steps_lnorm = pyrFlow(data)
-        loss, ll, unweighted_lnorm = pyramid_loss(pyramid_steps, pyramid_steps_lnorm)
+        loss, nll, unweighted_lnorm = pyramid_loss(pyramid_steps, pyramid_steps_lnorm)
 
         loss.backward()
         #if batch_idx > 881 and False:
@@ -54,7 +55,7 @@ def train(epoch):
                 visualize(loss, pyrFlow)
 
             #printt(str(batch_idx), pyrFlow.parameters())
-            individual_loss = f" nll: {ll.item() / BITS_PER_DIM_NORM:.5f} " \
+            individual_loss = f" nll: {nll.item() / BITS_PER_DIM_NORM:.5f} " \
                               f"norm: {unweighted_lnorm.item() / BITS_PER_DIM_NORM:.5f}"
             percentage = 100. * batch_idx / len(train_loader)
             print(f'Train Epoch: {epoch} [{batch_idx * len(data)}/{len(train_loader.dataset)} ({percentage:.0f}%)]'

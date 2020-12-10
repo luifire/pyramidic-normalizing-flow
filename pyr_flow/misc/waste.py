@@ -96,14 +96,9 @@ erste conv action
         return None
         """
 
-
-import numpy as np
-import torch
 import torch.nn as nn
-from torch import distributions
 
-from misc.misc import *
-from misc.constants import *
+from constants import *
 from model.layer_module import LayerModule
 
 
@@ -173,3 +168,21 @@ class InvertiblePolynome(LayerModule):
         x = x.reshape(original_shape)
 
         return x, logd_det
+
+"""
+        shift_matrix = torch.zeros(image_depth, image_depth, device=DEVICE)
+        for i in range(image_depth):
+            shift_matrix[i, (i+1) % image_depth] = 1
+
+        if jump_over_pixel:
+            # for images with more channels we want to change the entire pixel
+            for _ in range(PIXEL_DEPTH - 1): # ** CHANNEL_COUNT didn't work
+                shift_matrix = shift_matrix.matmul(shift_matrix)
+        """
+"""
+if False and diag.prod().item() == 0:
+    print(self.name)
+    print(diag)
+
+    print("diag has zeros")
+    """

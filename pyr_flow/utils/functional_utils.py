@@ -1,6 +1,4 @@
-import torchvision
-
-from misc.constants import *
+from constants import *
 
 
 def get_shift_matrix(size, shift_by=1):
@@ -14,7 +12,7 @@ def get_shift_matrix(size, shift_by=1):
 
     return shift_by_n
 
-def __channel_to_last_dim(x):
+def channel_to_last_dim(x):
     return x.permute(0, 2, 3, 1)
 
 

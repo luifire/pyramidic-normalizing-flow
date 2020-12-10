@@ -1,10 +1,6 @@
-import numpy as np
-import torch
 import torch.nn as nn
-from torch import distributions
 
-from misc.misc import *
-from misc.constants import *
+from constants import *
 from model.layer_module import LayerModule
 
 class SLogGate(LayerModule):
@@ -14,7 +10,9 @@ class SLogGate(LayerModule):
 
         # see: "Initialization of the parameter" in "Invertible Convolutional Flow"
         #self.alpha = nn.Parameter(torch.tensor(0.01, device=DEVICE))
-        self.alpha = nn.Parameter(torch.tensor(0.1, device=DEVICE)) # exp(alpha) ~= 0.01
+        self.alpha = nn.Parameter(torch.tensor(0.001, device=DEVICE))
+
+        print('S-Log Gate')
 
     def forward(self, x: torch.Tensor, lnorm_map):
         # alpha should be positive

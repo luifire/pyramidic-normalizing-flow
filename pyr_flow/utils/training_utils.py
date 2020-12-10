@@ -1,6 +1,5 @@
 import torch.nn.utils as utils
 
-from misc.constants import *
 
 # copied from KIRICHENKO
 def clip_grad_norm(optimizer, max_norm, norm_type=2):

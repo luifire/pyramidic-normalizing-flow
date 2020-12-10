@@ -1,10 +1,6 @@
-import numpy as np
-import torch
 import torch.nn as nn
-from torch import distributions
 
-from misc.misc import *
-from misc.constants import *
+from constants import *
 from model.layer_module import LayerModule
 
 from utils.functional_utils import get_shift_matrix
@@ -18,6 +14,8 @@ class InvertiblePolynome(LayerModule):
         self.hole_filler_vector = None
         self.holed_shift_matrix = None
         self.dummy = nn.Parameter(torch.zeros(1, device=DEVICE))
+
+        print('Invertible Polynomes')
 
     def _get_holed_shift_matrix_and_filler_vector(self, total_dim):
         if self.holed_shift_matrix is not None and self.hole_filler_vector is not None:

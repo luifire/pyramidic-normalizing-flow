@@ -1,10 +1,6 @@
-import numpy as np
-import torch
 import torch.nn as nn
-from torch import distributions
 
-from misc.misc import *
-from misc.constants import *
+from constants import *
 from model.layer_module import LayerModule
 from utils.functional_utils import get_shift_matrix
 
@@ -17,9 +13,11 @@ class CutOff(LayerModule):
     def __init__(self, remove_channel_count):
         super().__init__()
 
-        self.remove_dimension_count = remove_channel_count * PIXEL_DEPTH
+        self.remove_dimension_count = remove_channel_count
         # dummy registration
         self.dummy = nn.Parameter(torch.zeros(1, device=DEVICE), requires_grad=False)
+
+        print(f'Cut off last {self.remove_dimension_count}: dimensions')
 
     def forward(self, x):
         channel_count = x.shape[CHANNEL_DIM]
@@ -33,7 +31,7 @@ class CutOff(LayerModule):
 ###########################################################################
 ###########################################################################
 
-class ChannelShifter(LayerModule):
+class ChannelShifter__(LayerModule):
 
     """ dim 1 -> dim 2, dim2 -> dim3 ... (we are doing this on a patch level) """
     def __init__(self, image_depth, jump_over_pixel):

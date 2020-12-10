@@ -1,10 +1,9 @@
 import warnings
 from torchviz.dot import make_dot
-import numpy as np
 import os
 from shutil import rmtree
 
-from misc.constants import *
+from constants import *
 
 Batch_Idx = 0
 
@@ -28,7 +27,6 @@ def warn(text):
 
 def plot_data(data):
     import matplotlib.pyplot as plt
-    import time
 
     fig = plt.figure()
     for i in range(6):

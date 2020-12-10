@@ -1,4 +1,4 @@
-from misc.constants import *
+from constants import *
 
 class Evaluation():
 

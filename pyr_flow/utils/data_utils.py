@@ -1,6 +1,6 @@
 import torchvision
 
-from misc.constants import *
+from constants import *
 
 
 

@@ -1,10 +1,7 @@
-import numpy as np
-import torch
 import torch.nn as nn
 from torch import distributions
 
-from misc.misc import *
-from misc.constants import *
+from constants import *
 
 
 class PyramidLoss(nn.Module):
@@ -43,10 +40,11 @@ class PyramidLoss(nn.Module):
             weight = 1 / self.weight_decrease**i
             loss += weight * ll.mean()
 
-            unweighted_loss *= ll
+            unweighted_loss *= -ll # we multiply thus we need to make it negative beforehand,
+            # also isotropic Gauss -> we can simply multiply
             unweighted_lnorm += lnorm_step.reshape((batch_size, -1)).sum(1)
 
-        return -loss, -unweighted_loss.mean(), -unweighted_lnorm.mean()
+        return -loss, unweighted_loss.mean(), -unweighted_lnorm.mean()
         """
             step = step.reshape((batch_size, -1))
             n_rv = step.shape[1]
