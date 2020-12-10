@@ -4,6 +4,7 @@ from constants import *
 from model.layer_module import LayerModule
 
 class SLogGate(LayerModule):
+    log_gate_count = 0
 
     def __init__(self):
         super().__init__()
@@ -11,7 +12,7 @@ class SLogGate(LayerModule):
         # see: "Initialization of the parameter" in "Invertible Convolutional Flow"
         #self.alpha = nn.Parameter(torch.tensor(0.01, device=DEVICE))
         self.alpha = nn.Parameter(torch.tensor(0.001, device=DEVICE))
-
+        SLogGate.log_gate_count += 1
         print('S-Log Gate')
 
     def forward(self, x: torch.Tensor, lnorm_map):

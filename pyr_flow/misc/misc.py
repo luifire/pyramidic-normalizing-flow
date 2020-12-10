@@ -50,7 +50,7 @@ def plot_data(data):
     exit(1)
 
 
-def visualize(node, network):
+def create_flow_graph(node, network):
     dot = make_dot(node, params=dict(network.named_parameters()))
     dot.render("../graph", format="svg", view=False)
 
@@ -108,3 +108,7 @@ def clean_up_dir():
         rmtree(STATE_DIR)
     if not os.path.exists(STATE_DIR):
         os.makedirs(STATE_DIR)
+
+
+def print_separator():
+    print('##########################################################################\n')

@@ -186,3 +186,35 @@ if False and diag.prod().item() == 0:
 
     print("diag has zeros")
     """
+
+
+"""
+            step = step.reshape((batch_size, -1))
+            n_rv = step.shape[1]
+            prior = self._get_prior(n_rv)
+            prior_ll = prior.log_prob(step)
+
+            lnorm_map = pyramid_steps_lnorm[i]
+            lnorm = lnorm_map.reshape((batch_size, -1)).sum(1)
+            # -log(k) * rv_size um die Discretisierung weg zu rechnen
+            discretisation_offset = self.log_k * n_rv
+
+            corrected_prior_ll = prior_ll - discretisation_offset
+
+            ll = corrected_prior_ll + lnorm
+            #ll = corrected_prior_ll #+ lnorm
+            #ll = summed_logd_det
+            nll = -ll.mean()
+
+            # pyramid weighting
+            weight = 1 / self.weight_decrease**i
+            loss += nll * weight
+
+            unweighted_prior += -corrected_prior_ll
+            unweighted_lnorm += -lnorm
+            #if loss.isnan() or loss.isinf():
+            #    warn("loss is " + loss.item())
+            #    exit(1)
+
+        return loss, unweighted_prior.mean(), unweighted_lnorm.mean()
+        """

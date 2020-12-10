@@ -40,6 +40,8 @@ class PyramidFlowModel(LayerModule):
                                                jump_over_pixels=True))
         self.layer_list.append(InvertiblePolynome())
         """
+        print_separator()
+        print('Creating Pyramid Flow Network')
         for step in range(self.compute_halveableness()):
             self.layer_list.append(DepthConvBundle(total_pixel_depth=total_pixel_depth,
                                                    internal_pixel_depth=internal_pixel_depth,
@@ -62,6 +64,9 @@ class PyramidFlowModel(LayerModule):
             internal_pixel_depth = total_pixel_depth
             total_pixel_depth = total_pixel_depth * COMBINE_NEIGHBOR_KERNEL_SIZE_SQ
 
+        # for the last 'pixel' we, make some extra computation
+
+        print_separator()
     @staticmethod
     def compute_halveableness():
         width = DATA_WIDTH // INITIAL_KERNEL_SIZE
@@ -81,9 +86,6 @@ class PyramidFlowModel(LayerModule):
         #log_norm = torch.zeros(x.shape[0], device=DEVICE)
 
         for layer in self.layer_list:
-            if self.first_run_done is False:
-                print(f' {layer.get_info()} {x.shape}')
-
             if type(layer) is CutOff:
                 x, cut_off = layer(x)
                 pyramid_steps.append(cut_off)
@@ -106,6 +108,9 @@ class PyramidFlowModel(LayerModule):
                 print(Batch_Idx)
                 #exit(1)
 
+        if self.first_run_done is False:
+            self._print_waste(waste_steps)
+
         self.first_run_done = True
         # top data needs to be appended to the pyramid
         pyramid_steps.append(x)
@@ -113,9 +118,19 @@ class PyramidFlowModel(LayerModule):
 
         return pyramid_steps, pyramid_steps_lnorm
 
+    def _print_waste(self, waste_steps):
+        total_waste = 0
+        for w in waste_steps:
+            if w is None:
+                continue
+            total_waste += w.shape[1] * w.shape[2]
+        print(f'Total Waste {total_waste} of {TOTAL_IMAGE_DIMENSION}  {total_waste/TOTAL_IMAGE_DIMENSION*100:.2f}%')
+
     def print_parameter(self):
+        print_separator()
         for layer in self.layer_list:
             layer.print_parameter()
+        print_separator()
 
     def get_parameter_count(self):
         return sum([layer.get_parameter_count() for layer in self.layer_list])

@@ -1,6 +1,7 @@
 import torch.nn as nn
 
 from constants import *
+from misc.misc import *
 from model.layer_module import LayerModule
 
 from utils.functional_utils import get_shift_matrix
@@ -51,9 +52,11 @@ class InvertiblePolynome(LayerModule):
 
         holed = x.matmul(holed_shift_matrix)
         multiplier = holed + hole_filler_vector
+
+        #INCREASER = 1000
         multiplier[multiplier==0] = 1
         #printt("x", x[0, 1:2,4])
-        x = multiplier * x
+        x = x * multiplier
 
         #printt("holed", holed[0,1:2,4])
         #printt("result", multiplier[0, 1:2,4])
@@ -61,7 +64,7 @@ class InvertiblePolynome(LayerModule):
 
         # sum log |x|
         #logd_det = multiplier.abs().log().sum(1).sum(1).sum(1)
-
+        #warn("Divide and minus and ones were set to 0.001")
         lnorm_map += multiplier.abs().log()
 
         # revert order
