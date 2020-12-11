@@ -104,10 +104,10 @@ def test_polynomes():
 
 
 def clean_up_dir():
-    if os.path.exists(STATE_DIR):
-        rmtree(STATE_DIR)
-    if not os.path.exists(STATE_DIR):
-        os.makedirs(STATE_DIR)
+    if os.path.exists(TRAIN_STATE_DIR):
+        rmtree(TRAIN_STATE_DIR)
+    if not os.path.exists(TRAIN_STATE_DIR):
+        os.makedirs(TRAIN_STATE_DIR)
 
 
 def print_separator():

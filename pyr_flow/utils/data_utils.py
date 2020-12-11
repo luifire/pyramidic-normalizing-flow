@@ -4,7 +4,8 @@ from pyr_flow.constants import *
 
 
 
-def load_dataset(dataset) -> (torch.utils.data.DataLoader, torch.utils.data.DataLoader):
+def load_dataset(dataset, batch_size_test=BATCH_SIZE_TEST, batch_size_train=BATCH_SIZE_TRAIN) \
+        -> (torch.utils.data.DataLoader, torch.utils.data.DataLoader):
 
     # TODO add noise to data.
     # TODO: Note that all data is not normalized!
@@ -26,27 +27,37 @@ def load_dataset(dataset) -> (torch.utils.data.DataLoader, torch.utils.data.Data
         data_train = torchvision.datasets.MNIST('/files/', train=True, download=DOWNLOAD, transform=transformation)
         data_test = torchvision.datasets.MNIST('/files/', train=False, download=DOWNLOAD, transform=transformation)
     elif dataset == DataSet.CIFAR:
-        #32x32
+
         transformation = torchvision.transforms.Compose([
             torchvision.transforms.ToTensor(),
             # left, top, right and bottom
-            torchvision.transforms.Pad([0, 0, 1, 1], padding_mode='edge'),
+            # 32x32
+            # torchvision.transforms.Pad([0, 0, 1, 1], padding_mode='edge'),
+            torchvision.transforms.CenterCrop(CENTER_CROP)
         ])
 
         data_train = torchvision.datasets.CIFAR10('/files/', train=True, download=DOWNLOAD, transform=transformation)
         data_test = torchvision.datasets.CIFAR10('/files/', train=False, download=DOWNLOAD, transform=transformation)
+    elif dataset == DataSet.SVHN:
+        transformation = torchvision.transforms.Compose([
+            torchvision.transforms.ToTensor(),
+            torchvision.transforms.CenterCrop(CENTER_CROP)
+        ])
+
+        data_train = torchvision.datasets.SVHN('/files/', download=DOWNLOAD, transform=transformation)
+        data_test = None # there is no test, train split
     else:
         raise Exception("Ups!")
 
     train_loader = torch.utils.data.DataLoader(data_train,
-                                               batch_size=BATCH_SIZE_TRAIN,
+                                               batch_size=batch_size_train,
                                                shuffle=False,
                                                num_workers=4,
                                                pin_memory=True)
     test_loader = torch.utils.data.DataLoader(data_test,
-                                              batch_size=BATCH_SIZE_TEST,
+                                              batch_size=batch_size_test,
                                               shuffle=False,
-                                              #num_workers=4,
+                                              num_workers=4,
                                               pin_memory=True)
 
     return train_loader, test_loader

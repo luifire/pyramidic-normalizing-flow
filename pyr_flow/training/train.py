@@ -37,8 +37,8 @@ if __name__=='__main__':
             Batch_Idx += 1
             data = data.to(DEVICE)
 
-            if batch_idx > 100:
-                exit(1)
+            #if batch_idx > 100:
+            #    exit(0)
             #plot_data(data)
             #print(batch_idx)
 
@@ -58,11 +58,16 @@ if __name__=='__main__':
 
             if batch_idx % LOG_INTERVAL == 0:
                 if epoch == 0 and batch_idx == 0:
+                    PyramidLoss.print_loss_size(pyramid_steps)
+
                     try:
                         create_flow_graph(loss, pyrFlow)
                     except RecursionError:
                         warn("Couldn't draw graph. Too many recursions")
-                    PyramidLoss.print_loss_size(pyramid_steps)
+
+                nll = nll.mean()
+                unweighted_lnorm = unweighted_lnorm.mean()
+                top_nll = top_nll.mean()
 
                 #printt(str(batch_idx), pyrFlow.parameters())
                 individual_loss = f" nll: {nll.item() / BITS_PER_DIM_NORM:.5f} " \
@@ -91,8 +96,8 @@ if __name__=='__main__':
             eval_loss = evaluation.eval_on_normal_test_set(pyrFlow, pyramid_loss, TOTAL_IMAGE_DIMENSION)
             name = f'{epoch} - loss - {eval_loss:.5f}'
 
-            torch.save(pyrFlow.state_dict(), f'{STATE_DIR}/{name}.model')
-            torch.save(optimizer.state_dict(), f'{STATE_DIR}/{name}.optimizer')
+            torch.save(pyrFlow.state_dict(), f'{TRAIN_STATE_DIR}/{name}.model')
+            torch.save(optimizer.state_dict(), f'{TRAIN_STATE_DIR}/{name}.optimizer')
 
         train(epoch)
         pyrFlow.print_parameter()

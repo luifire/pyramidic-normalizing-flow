@@ -8,10 +8,10 @@ from pyr_flow.misc.misc import *
 
 class PyramidLoss(nn.Module):
 
-    def __init__(self, rv_size, k=256):
+    def __init__(self, rv_size=-1, k=256):
         super().__init__()
         self.log_k = np.log(k)
-        self.rv_size = rv_size
+        #self.rv_size = rv_size
         self.prior = dict()
         #self.discretisation_offset = np.log(self.k) * self.rv_size
 
@@ -40,16 +40,15 @@ class PyramidLoss(nn.Module):
             lnorm_step = lnorm_step.reshape((batch_size, -1))
             ll = self._compute_log_prob(step, lnorm_step)
 
-            if i == 0: top_nll = -ll.mean()
+            if i == 0: top_nll = -ll
             # pyramid weighting
             weight = 1 / PYRAMID_STEP_WEIGHTING ** i
             loss += weight * ll.mean() / step.shape[1]
 
-            unweighted_loss *= -ll # we multiply thus we need to make it negative beforehand,
-            # also isotropic Gauss -> we can simply multiply
+            unweighted_loss += ll # isotropic Gauss -> we can simply multiply (or add in log Space)
             unweighted_lnorm += lnorm_step.sum(1)
 
-        return -loss, unweighted_loss.mean(), -unweighted_lnorm.mean(), top_nll
+        return -loss, -unweighted_loss, -unweighted_lnorm, top_nll
 
     def _compute_log_prob(self, x, lnorm_map):
         batch_size, n_rv = x.shape
