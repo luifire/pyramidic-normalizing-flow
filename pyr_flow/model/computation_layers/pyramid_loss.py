@@ -1,10 +1,10 @@
 import torch.nn as nn
 from torch import distributions
 
-from model.computation_layers.s_log_gate import SLogGate
+from pyr_flow.model.computation_layers.s_log_gate import SLogGate
 
-from misc.misc import *
-from constants import *
+from pyr_flow.constants import *
+from pyr_flow.misc.misc import *
 
 class PyramidLoss(nn.Module):
 
@@ -40,11 +40,10 @@ class PyramidLoss(nn.Module):
             lnorm_step = lnorm_step.reshape((batch_size, -1))
             ll = self._compute_log_prob(step, lnorm_step)
 
-            ll_normed = ll / step.shape[1]
             if i == 0: top_nll = -ll.mean()
             # pyramid weighting
             weight = 1 / PYRAMID_STEP_WEIGHTING ** i
-            loss += weight * ll.mean()
+            loss += weight * ll.mean() / step.shape[1]
 
             unweighted_loss *= -ll # we multiply thus we need to make it negative beforehand,
             # also isotropic Gauss -> we can simply multiply
@@ -80,7 +79,7 @@ class PyramidLoss(nn.Module):
             step = step.reshape(-1)
             weight = 1 / (PYRAMID_STEP_WEIGHTING ** i)
             size = step.shape[0]
-            print(f'step {i} size: {size} weight: {weight:.4f}\t')
+            print(f'step {i} size: {size} weight: {weight:.4f}%')
             size_sum += size
 
         print(f'Sum(size) = {size_sum} total image dimension {TOTAL_IMAGE_DIMENSION}')

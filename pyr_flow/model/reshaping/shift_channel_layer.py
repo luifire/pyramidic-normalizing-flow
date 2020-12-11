@@ -1,9 +1,10 @@
 import torch.nn as nn
+import torch
 
-from misc.misc import *
+from pyr_flow.model.layer_module import LayerModule
+from pyr_flow.utils.functional_utils import get_shift_matrix
 
-from model.layer_module import LayerModule
-from utils.functional_utils import get_shift_matrix
+from pyr_flow.constants import *
 
 class ChannelShifter(LayerModule):
 

@@ -1,9 +1,8 @@
 import torch.nn as nn
 
-from model.layer_module import LayerModule
+from pyr_flow.model.layer_module import LayerModule
 
-from misc.misc import *
-from constants import *
+from pyr_flow.constants import *
 
 
 class DepthConv(LayerModule):

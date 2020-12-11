@@ -1,7 +1,7 @@
 import torch.nn as nn
 
-from constants import *
-from model.layer_module import LayerModule
+from pyr_flow.constants import *
+from pyr_flow.model.layer_module import LayerModule
 
 class SLogGate(LayerModule):
     log_gate_count = 0

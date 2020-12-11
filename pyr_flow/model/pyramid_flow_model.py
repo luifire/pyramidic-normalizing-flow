@@ -1,16 +1,15 @@
-from model.computation_layers.depth_conv_layer import *
-from model.reshaping.initial_reshaping import merge_patches
-from model.computation_layers.s_log_gate import SLogGate
-from model.layer_module import LayerModule
-from model.reshaping.cut_off_layer import CutOff
-from model.computation_layers.conv_bundle import DepthConvBundle
-from model.computation_layers.invertible_polynomes import InvertiblePolynome
-from model.reshaping.combine_neighboring_info import CombineNeighbors
+from pyr_flow.model.computation_layers.depth_conv_layer import *
+from pyr_flow.model.reshaping.initial_reshaping import merge_patches
+from pyr_flow.model.computation_layers.s_log_gate import SLogGate
+from pyr_flow.model.layer_module import LayerModule
+from pyr_flow.model.reshaping.cut_off_layer import CutOff
+from pyr_flow.model.computation_layers.conv_bundle import DepthConvBundle
+from pyr_flow.model.reshaping.combine_neighboring_info import CombineNeighbors
 
-from utils.functional_utils import channel_to_last_dim
+from pyr_flow.utils.functional_utils import channel_to_last_dim
 
-from constants import *
-
+from pyr_flow.misc.misc import *
+from pyr_flow.constants import *
 
 class PyramidFlowModel(LayerModule):
 
@@ -46,7 +45,7 @@ class PyramidFlowModel(LayerModule):
             self.layer_list.append(DepthConvBundle(total_pixel_depth=total_pixel_depth,
                                                    internal_pixel_depth=internal_pixel_depth,
                                                    jump_over_pixels=True))
-            self.layer_list.append(InvertiblePolynome())
+            #self.layer_list.append(InvertiblePolynome())
 
             self.layer_list.append(SLogGate())
             """
@@ -75,7 +74,7 @@ class PyramidFlowModel(LayerModule):
             self.layer_list.append(DepthConvBundle(total_pixel_depth=total_pixel_depth,
                                                    internal_pixel_depth=pixel_jumper,
                                                    jump_over_pixels=True))
-            self.layer_list.append(InvertiblePolynome())
+            #self.layer_list.append(InvertiblePolynome())
 
             self.layer_list.append(SLogGate())
             """

@@ -1,9 +1,9 @@
 import warnings
-from torchviz.dot import make_dot
+from pyr_flow.torchviz.dot import make_dot
 import os
 from shutil import rmtree
 
-from constants import *
+from pyr_flow.constants import *
 
 Batch_Idx = 0
 

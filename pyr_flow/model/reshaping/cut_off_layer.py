@@ -1,8 +1,8 @@
 import torch.nn as nn
 
-from constants import *
-from model.layer_module import LayerModule
-from utils.functional_utils import get_shift_matrix
+from pyr_flow.constants import *
+from pyr_flow.model.layer_module import LayerModule
+from pyr_flow.utils.functional_utils import get_shift_matrix
 
 
 class CutOff(LayerModule):

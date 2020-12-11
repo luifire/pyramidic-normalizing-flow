@@ -1,6 +1,6 @@
 import torchvision
 
-from constants import *
+from pyr_flow.constants import *
 
 
 
@@ -38,8 +38,16 @@ def load_dataset(dataset) -> (torch.utils.data.DataLoader, torch.utils.data.Data
     else:
         raise Exception("Ups!")
 
-    train_loader = torch.utils.data.DataLoader(data_train, batch_size=BATCH_SIZE_TRAIN, shuffle=True)
-    test_loader = torch.utils.data.DataLoader(data_test, batch_size=BATCH_SIZE_TEST, shuffle=True)
+    train_loader = torch.utils.data.DataLoader(data_train,
+                                               batch_size=BATCH_SIZE_TRAIN,
+                                               shuffle=False,
+                                               num_workers=4,
+                                               pin_memory=True)
+    test_loader = torch.utils.data.DataLoader(data_test,
+                                              batch_size=BATCH_SIZE_TEST,
+                                              shuffle=False,
+                                              #num_workers=4,
+                                              pin_memory=True)
 
     return train_loader, test_loader
 

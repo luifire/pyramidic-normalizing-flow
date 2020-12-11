@@ -1,4 +1,4 @@
-from constants import *
+from pyr_flow.constants import *
 
 
 def merge_patches(x, kernel_size):

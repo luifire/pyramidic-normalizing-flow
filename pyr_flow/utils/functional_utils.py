@@ -1,4 +1,4 @@
-from constants import *
+from pyr_flow.constants import *
 
 
 def get_shift_matrix(size, shift_by=1):

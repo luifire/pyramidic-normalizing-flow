@@ -1,10 +1,10 @@
 import torch.nn as nn
 
-from model.reshaping.shift_channel_layer import ChannelShifter
-from model.layer_module import LayerModule
+from pyr_flow.model.reshaping.shift_channel_layer import ChannelShifter
+from pyr_flow.model.layer_module import LayerModule
 
-from constants import *
-from model.computation_layers.depth_conv_layer import DepthConv
+from pyr_flow.constants import *
+from pyr_flow.model.computation_layers.depth_conv_layer import DepthConv
 
 
 class DepthConvBundle(LayerModule):

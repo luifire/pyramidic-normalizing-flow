@@ -1,9 +1,9 @@
 import torch.nn as nn
 
-from constants import *
-from model.layer_module import LayerModule
+from pyr_flow.constants import *
+from pyr_flow.model.layer_module import LayerModule
 
-from model.reshaping.initial_reshaping import merge_patches
+from pyr_flow.model.reshaping.initial_reshaping import merge_patches
 
 """ 
 Without batch
