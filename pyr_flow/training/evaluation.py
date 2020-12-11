@@ -24,9 +24,9 @@ class Evaluation():
             pyramid_steps, lnorm_map = pyrFlow(data)
             loss, ll, unweighted_lnorm, top_ls = pyramid_loss(pyramid_steps, lnorm_map)
             loss_avg += loss.item()
-            ll_avg += ll.item()
-            norm_avg += unweighted_lnorm.item()
-            top_avg += top_ls.item()
+            ll_avg += ll.mean().item()
+            norm_avg += unweighted_lnorm.mean().item()
+            top_avg += top_ls.mean().item()
 
         # make average (/N) and make bits per dim
         batch_size = len(self.test_loader)

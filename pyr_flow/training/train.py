@@ -37,6 +37,12 @@ if __name__=='__main__':
             Batch_Idx += 1
             data = data.to(DEVICE)
 
+            # randomly add noise (for time efficiency)
+            if batch_idx % 100 == 0:
+                with torch.no_grad():
+                    noise = torch.normal(mean=0, std=0.0001, size=data.shape, device=DEVICE)
+                    data += noise
+
             #if batch_idx > 100:
             #    exit(0)
             #plot_data(data)
@@ -48,9 +54,6 @@ if __name__=='__main__':
             loss, nll, unweighted_lnorm, top_nll = pyramid_loss(pyramid_steps, pyramid_steps_lnorm)
 
             loss.backward()
-            #if batch_idx > 881 and False:
-            #    printt("loss", loss)
-            #    printt("grad", pyrFlow.conv_1.bundle[0].weights.grad)
 
             training_utils.clip_grad_norm(optimizer, MAX_GRAD_NORM)
 
@@ -92,12 +95,13 @@ if __name__=='__main__':
 
 
     for epoch in range(N_EPOCHS):
-        if (epoch + 1) % EVAL_INTERVAL == 0:
+        if+ (epoch + 1) % EVAL_INTERVAL == 0:
             eval_loss = evaluation.eval_on_normal_test_set(pyrFlow, pyramid_loss, TOTAL_IMAGE_DIMENSION)
             name = f'{epoch} - loss - {eval_loss:.5f}'
 
-            torch.save(pyrFlow.state_dict(), f'{TRAIN_STATE_DIR}/{name}.model')
-            torch.save(optimizer.state_dict(), f'{TRAIN_STATE_DIR}/{name}.optimizer')
-
         train(epoch)
         pyrFlow.print_parameter()
+
+        epoch += '  ' + str(epoch)
+        torch.save(pyrFlow.state_dict(), f'{TRAIN_STATE_DIR}/{name}.model')
+        torch.save(optimizer.state_dict(), f'{TRAIN_STATE_DIR}/{name}.optimizer')

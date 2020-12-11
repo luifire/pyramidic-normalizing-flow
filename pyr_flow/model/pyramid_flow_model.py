@@ -55,7 +55,7 @@ class PyramidFlowModel(LayerModule):
             
             self.layer_list.append(InvertiblePolynome())
             """
-            total_pixel_depth = total_pixel_depth // 2# + total_pixel_depth % 2
+            total_pixel_depth = total_pixel_depth // 2
             self.layer_list.append(CutOff(remaining_depth=total_pixel_depth))
 
             self.layer_list.append(CombineNeighbors())

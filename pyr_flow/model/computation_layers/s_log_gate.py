@@ -11,7 +11,7 @@ class SLogGate(LayerModule):
 
         # see: "Initialization of the parameter" in "Invertible Convolutional Flow"
         #self.alpha = nn.Parameter(torch.tensor(0.01, device=DEVICE))
-        self.alpha = nn.Parameter(torch.tensor(0.001, device=DEVICE))
+        self.alpha = nn.Parameter(torch.tensor(S_LOG_GATE_ALPHA_INIT, device=DEVICE))
         SLogGate.log_gate_count += 1
         print('S-Log Gate')
 

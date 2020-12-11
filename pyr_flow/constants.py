@@ -4,9 +4,9 @@ from enum import Enum
 
 DEVICE = torch.device("cuda:0")
 
-N_EPOCHS = 1
+N_EPOCHS = 500
 BATCH_SIZE_TRAIN = 32
-BATCH_SIZE_TEST = 3000
+BATCH_SIZE_TEST = 2000
 #LEARNING_RATE = 1e-4
 LEARNING_RATE = 1e-5
 #LEARNING_RATE = 1e-3
@@ -15,6 +15,8 @@ WEIGHT_DECAY = 5e-5
 LOG_INTERVAL = 100
 EVAL_INTERVAL = 5 # every epoches
 MAX_GRAD_NORM = 100
+
+S_LOG_GATE_ALPHA_INIT = 0.1
 
 PYRAMID_STEP_WEIGHTING = 1.5 # weighted by 1/2**i
 LAST_PIXEL_BREAK_DOWN = 3 # last pixel consists of N pixels, then our pyramid steps will be /3

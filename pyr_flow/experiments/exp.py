@@ -8,7 +8,8 @@ COMPLETE_NLL = 0
 TOP_NLL = 1
 
 if __name__ == '__main__':
-    results = load_eval_data()
+    model_path = f'{STATE_DIR}CIFAR_use/14 - loss - 10.88870.model'
+    results = load_eval_data(model_path)
 
     sns.distplot(results[EvaluatedDatasets.CIFAR_TRAIN][COMPLETE_NLL], label="Cifar Test")
     sns.distplot(results[EvaluatedDatasets.CIFAR_TEST][COMPLETE_NLL], label="Cifar Train")

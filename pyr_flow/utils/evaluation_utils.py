@@ -24,8 +24,8 @@ def eval_all(model, loss, dataset_loader):
             nll_list.append(nll.detach().cpu())
             top_nll_list.append(top_nll.detach().cpu())
 
-    np_nll_list = torch.cat(nll_list).numpy()
-    np_top_list = torch.cat(top_nll_list).numpy()
+    np_nll_list = torch.cat(nll_list).numpy() / BITS_PER_DIM_NORM
+    np_top_list = torch.cat(top_nll_list).numpy() / BITS_PER_DIM_NORM
 
     _print_state(len(dataset_loader), dataset_loader)
 
@@ -43,6 +43,8 @@ def load_eval_data(model_path):
     model = PyramidFlowModel()
     model.eval()
     model.load_state_dict(torch.load(model_path))
+
+    model.print_parameter()
 
     loss = PyramidLoss()
     loss.eval()

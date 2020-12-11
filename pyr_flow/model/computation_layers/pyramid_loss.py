@@ -78,7 +78,7 @@ class PyramidLoss(nn.Module):
             step = step.reshape(-1)
             weight = 1 / (PYRAMID_STEP_WEIGHTING ** i)
             size = step.shape[0]
-            print(f'step {i} size: {size} weight: {weight:.4f}%')
+            print(f'step {i} size: {size} weight: {weight:.4f}')
             size_sum += size
 
         print(f'Sum(size) = {size_sum} total image dimension {TOTAL_IMAGE_DIMENSION}')
