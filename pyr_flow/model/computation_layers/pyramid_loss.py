@@ -2,6 +2,7 @@ import torch.nn as nn
 from torch import distributions
 
 from pyr_flow.model.computation_layers.s_log_gate import SLogGate
+from pyr_flow.model.computation_layers.tanh_gate import TanhGate
 
 from pyr_flow.constants import *
 from pyr_flow.misc.misc import *
@@ -84,4 +85,5 @@ class PyramidLoss(nn.Module):
         print(f'Sum(size) = {size_sum} total image dimension {TOTAL_IMAGE_DIMENSION}')
 
         print(f'Amount of Log Gates: {SLogGate.log_gate_count}')
+        print(f'Amount of Tanh Gates: {TanhGate.tanh_gate_count}')
         print_separator()

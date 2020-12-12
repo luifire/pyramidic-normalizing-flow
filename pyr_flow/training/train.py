@@ -88,20 +88,20 @@ if __name__=='__main__':
 
                 if torch.isnan(loss).any():
                     exit(2)
-
+        return nll.mean().item() / BITS_PER_DIM_NORM, top_nll.mean().item()
                 # TODO check std dev
                 #train_losses.append(loss.item())
                 #train_counter.append((batch_idx*64) + ((epoch-1)*len(train_loader.dataset)))
 
 
     for epoch in range(N_EPOCHS):
-        if+ (epoch + 1) % EVAL_INTERVAL == 0:
-            eval_loss = evaluation.eval_on_normal_test_set(pyrFlow, pyramid_loss, TOTAL_IMAGE_DIMENSION)
-            name = f'{epoch} - loss - {eval_loss:.5f}'
-
-        train(epoch)
+        last_nll, last_top_nll = train(epoch)
         pyrFlow.print_parameter()
 
-        epoch += '  ' + str(epoch)
+        if (epoch + 1) % EVAL_INTERVAL == 0:
+            eval_loss = evaluation.eval_on_normal_test_set(pyrFlow, pyramid_loss, TOTAL_IMAGE_DIMENSION)
+            name = f'{epoch} - loss - {eval_loss:.5f}'
+        else:
+            name = f'{epoch} - loss - {last_nll:.5f} top_nll {last_top_nll:.4f}'
         torch.save(pyrFlow.state_dict(), f'{TRAIN_STATE_DIR}/{name}.model')
         torch.save(optimizer.state_dict(), f'{TRAIN_STATE_DIR}/{name}.optimizer')

@@ -16,6 +16,16 @@ LOG_INTERVAL = 100
 EVAL_INTERVAL = 5 # every epoches
 MAX_GRAD_NORM = 100
 
+
+MODEL_TYPE = 3
+"""
+1 - addition and slog gat
+2 - tanh, polynomes
+3 - leaky relu | hat tatsächlich svhn von cifar getrennt!
+4 - Bent Identity (weil Leaky Relu hat keinen Loss für die Norm berechnen können. Deshalb ging der Loss erstmal hoch!)
+
+"""
+
 S_LOG_GATE_ALPHA_INIT = 0.1
 
 PYRAMID_STEP_WEIGHTING = 1.5 # weighted by 1/2**i

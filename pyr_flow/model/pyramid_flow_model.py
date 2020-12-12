@@ -1,10 +1,13 @@
 from pyr_flow.model.computation_layers.depth_conv_layer import *
 from pyr_flow.model.reshaping.initial_reshaping import merge_patches
 from pyr_flow.model.computation_layers.s_log_gate import SLogGate
+from pyr_flow.model.computation_layers.tanh_gate import TanhGate
 from pyr_flow.model.layer_module import LayerModule
 from pyr_flow.model.reshaping.cut_off_layer import CutOff
 from pyr_flow.model.computation_layers.conv_bundle import DepthConvBundle
 from pyr_flow.model.reshaping.combine_neighboring_info import CombineNeighbors
+from pyr_flow.model.computation_layers.invertible_polynomes import InvertiblePolynome
+from pyr_flow.model.computation_layers.leaky_relu_gate import LeakyRelu
 
 from pyr_flow.utils.functional_utils import channel_to_last_dim
 
@@ -16,7 +19,7 @@ class PyramidFlowModel(LayerModule):
     def __init__(self):
         super().__init__()
 
-        self.layer_list = nn.ModuleList()
+        layer_list = []
         self.first_run_done = False
         internal_pixel_depth = PIXEL_DEPTH
         total_pixel_depth = INITIAL_KERNEL_SIZE_SQ * internal_pixel_depth
@@ -29,36 +32,39 @@ class PyramidFlowModel(LayerModule):
         #bundle_size_2 = 2
         #channel_size = 1 # warn
         """
-        self.layer_list.append(DepthConvBundle("1", channel_count=channel_size, bundle_size=bundle_size,
+        layer_list.append(DepthConvBundle("1", channel_count=channel_size, bundle_size=bundle_size,
                                                jump_over_pixels=True))
 
-        self.layer_list.append(InvertiblePolynome())
+        layer_list.append(InvertiblePolynome())
 
-        self.layer_list.append(SLogGate())
-        self.layer_list.append(DepthConvBundle("2", channel_count=channel_size, bundle_size=bundle_size_2,
+        layer_list.append(SLogGate())
+        layer_list.append(DepthConvBundle("2", channel_count=channel_size, bundle_size=bundle_size_2,
                                                jump_over_pixels=True))
-        self.layer_list.append(InvertiblePolynome())
+        layer_list.append(InvertiblePolynome())
         """
         print_separator()
         print('Creating Pyramid Flow Network')
         for step in range(self.compute_halveableness()):
-            self.layer_list.append(DepthConvBundle(total_pixel_depth=total_pixel_depth,
-                                                   internal_pixel_depth=internal_pixel_depth,
-                                                   jump_over_pixels=True))
-            #self.layer_list.append(InvertiblePolynome())
 
-            self.layer_list.append(SLogGate())
-            """
-            self.layer_list.append(DepthConvBundle(total_pixel_depth=total_pixel_depth,
-                                                   internal_pixel_depth=internal_pixel_depth,
-                                                   jump_over_pixels=True))
-            
-            self.layer_list.append(InvertiblePolynome())
-            """
+            #bau einen eye layer, wo man die diagonale lernen kann. und dann? David?
+
+            if MODEL_TYPE != 2:
+                layer_list.append(DepthConvBundle(total_pixel_depth=total_pixel_depth,
+                                                       internal_pixel_depth=internal_pixel_depth,
+                                                       jump_over_pixels=True))
+
+            if MODEL_TYPE == 1:
+                layer_list.append(SLogGate())
+            elif MODEL_TYPE == 2:
+                layer_list.append(TanhGate())
+                layer_list.append(InvertiblePolynome())
+            elif MODEL_TYPE == 3:
+                layer_list.append(LeakyRelu())
+
             total_pixel_depth = total_pixel_depth // 2
-            self.layer_list.append(CutOff(remaining_depth=total_pixel_depth))
+            layer_list.append(CutOff(remaining_depth=total_pixel_depth))
 
-            self.layer_list.append(CombineNeighbors())
+            layer_list.append(CombineNeighbors())
 
             internal_pixel_depth = total_pixel_depth
             total_pixel_depth = total_pixel_depth * COMBINE_NEIGHBOR_KERNEL_SIZE_SQ
@@ -71,20 +77,28 @@ class PyramidFlowModel(LayerModule):
             if total_pixel_depth > 50:
                 pixel_jumper = total_pixel_depth // 2
 
-            self.layer_list.append(DepthConvBundle(total_pixel_depth=total_pixel_depth,
-                                                   internal_pixel_depth=pixel_jumper,
-                                                   jump_over_pixels=True))
-            #self.layer_list.append(InvertiblePolynome())
+            if MODEL_TYPE != 2:
+                layer_list.append(DepthConvBundle(total_pixel_depth=total_pixel_depth,
+                                                       internal_pixel_depth=pixel_jumper,
+                                                       jump_over_pixels=True))
 
-            self.layer_list.append(SLogGate())
-            """
-            self.layer_list.append(DepthConvBundle(total_pixel_depth=total_pixel_depth,
-                                                   internal_pixel_depth=pixel_jumper,
-                                                   jump_over_pixels=True))
-            self.layer_list.append(InvertiblePolynome())
-            """
+            if MODEL_TYPE == 1:
+                layer_list.append(SLogGate())
+            elif MODEL_TYPE == 2:
+                layer_list.append(TanhGate())
+                layer_list.append(InvertiblePolynome())
+            elif MODEL_TYPE == 3:
+                layer_list.append(LeakyRelu())
+
             total_pixel_depth = total_pixel_depth // LAST_PIXEL_BREAK_DOWN
-            self.layer_list.append(CutOff(remaining_depth=total_pixel_depth))
+            layer_list.append(CutOff(remaining_depth=total_pixel_depth))
+
+        # remove last tanh gate
+        if MODEL_TYPE == 2 or MODEL_TYPE == 3:
+            layer_list.remove(layer_list[-1])
+            layer_list.remove(layer_list[-1])
+
+        self.layer_list = nn.ModuleList(layer_list)
 
         print_separator()
 

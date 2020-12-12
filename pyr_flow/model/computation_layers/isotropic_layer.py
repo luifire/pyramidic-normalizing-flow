@@ -16,11 +16,7 @@ class DepthConv(LayerModule):
         self.jump_over_pixels = jump_over_pixels
         self.name = name
 
-        #later init
-        self.non_updateable_parameters = None
-        self.identity_start = None
-        self.identity_end = None
-        self.identity_keeper_sub_matrix = None
+
 
         # Weight init kind of suggested by invertible conv flow
         weights = torch.normal(mean=0, std=0.0001, size=[total_pixel_depth, total_pixel_depth], device=DEVICE)
