@@ -51,7 +51,8 @@ if __name__=='__main__':
             optimizer.zero_grad()
 
             pyramid_steps, pyramid_steps_lnorm = pyrFlow(data)
-            loss, nll, unweighted_lnorm, top_nll = pyramid_loss(pyramid_steps, pyramid_steps_lnorm)
+            use_norm = batch_idx % 100 == 0 # only use norm every x time as the gradient towards the norm is way bigger
+            loss, nll, unweighted_lnorm, top_nll = pyramid_loss(pyramid_steps, pyramid_steps_lnorm, use_norm)
 
             loss.backward()
 

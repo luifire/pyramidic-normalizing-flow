@@ -17,7 +17,7 @@ EVAL_INTERVAL = 5 # every epoches
 MAX_GRAD_NORM = 100
 
 
-MODEL_TYPE = 3
+MODEL_TYPE = 4
 """
 1 - addition and slog gat
 2 - tanh, polynomes

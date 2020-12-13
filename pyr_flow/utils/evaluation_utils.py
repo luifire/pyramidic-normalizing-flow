@@ -14,7 +14,7 @@ def eval_all(model, loss, dataset_loader):
     top_nll_list = []
 
     for batch_idx, (data, target) in enumerate(dataset_loader):
-        if batch_idx * BATCH_SIZE_TEST > 2000:
+        if batch_idx * BATCH_SIZE_TEST > 3000:
             print('terminated before all images were evaluated')
             break
 
@@ -48,7 +48,7 @@ def load_eval_data(model_path):
     model.eval()
     model.load_state_dict(torch.load(model_path))
 
-    model.print_parameter()
+    #model.print_parameter()
 
     loss = PyramidLoss()
     loss.eval()

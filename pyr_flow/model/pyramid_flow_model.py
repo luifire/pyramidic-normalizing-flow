@@ -8,6 +8,7 @@ from pyr_flow.model.computation_layers.conv_bundle import DepthConvBundle
 from pyr_flow.model.reshaping.combine_neighboring_info import CombineNeighbors
 from pyr_flow.model.computation_layers.invertible_polynomes import InvertiblePolynome
 from pyr_flow.model.computation_layers.leaky_relu_gate import LeakyRelu
+from pyr_flow.model.computation_layers.bent_identity_gate import BentIdentity
 
 from pyr_flow.utils.functional_utils import channel_to_last_dim
 
@@ -60,6 +61,8 @@ class PyramidFlowModel(LayerModule):
                 layer_list.append(InvertiblePolynome())
             elif MODEL_TYPE == 3:
                 layer_list.append(LeakyRelu())
+            elif MODEL_TYPE == 4:
+                layer_list.append(BentIdentity())
 
             total_pixel_depth = total_pixel_depth // 2
             layer_list.append(CutOff(remaining_depth=total_pixel_depth))
@@ -89,12 +92,14 @@ class PyramidFlowModel(LayerModule):
                 layer_list.append(InvertiblePolynome())
             elif MODEL_TYPE == 3:
                 layer_list.append(LeakyRelu())
+            elif MODEL_TYPE == 4:
+                layer_list.append(BentIdentity())
 
             total_pixel_depth = total_pixel_depth // LAST_PIXEL_BREAK_DOWN
             layer_list.append(CutOff(remaining_depth=total_pixel_depth))
 
         # remove last tanh gate
-        if MODEL_TYPE == 2 or MODEL_TYPE == 3:
+        if MODEL_TYPE in [2, 3, 4]:
             layer_list.remove(layer_list[-1])
             layer_list.remove(layer_list[-1])
 

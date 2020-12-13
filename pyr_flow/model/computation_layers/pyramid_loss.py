@@ -23,7 +23,7 @@ class PyramidLoss(nn.Module):
                                                          torch.eye(size).to(DEVICE))
         return self.prior[size]
 
-    def forward(self, pyramid_steps, pyramid_steps_lnorm):
+    def forward(self, pyramid_steps, pyramid_steps_lnorm, use_norm=True):
         loss = torch.zeros(1, device=DEVICE)
         #unweighted_prior = torch.zeros(1, device=DEVICE)
         #unweighted_lnorm = torch.zeros(1, device=DEVICE)
@@ -39,7 +39,7 @@ class PyramidLoss(nn.Module):
 
             step = step.reshape((batch_size, -1))
             lnorm_step = lnorm_step.reshape((batch_size, -1))
-            ll = self._compute_log_prob(step, lnorm_step)
+            ll = self._compute_log_prob(step, lnorm_step, use_norm)
 
             if i == 0: top_nll = -ll
             # pyramid weighting
@@ -51,7 +51,7 @@ class PyramidLoss(nn.Module):
 
         return -loss, -unweighted_loss, -unweighted_lnorm, top_nll
 
-    def _compute_log_prob(self, x, lnorm_map):
+    def _compute_log_prob(self, x, lnorm_map, use_norm=True):
         batch_size, n_rv = x.shape
 
         prior = self._get_prior(n_rv)
@@ -63,7 +63,10 @@ class PyramidLoss(nn.Module):
 
         corrected_prior_ll = prior_ll - discretisation_offset
 
-        ll = corrected_prior_ll + lnorm
+        if use_norm:
+            ll = corrected_prior_ll + lnorm
+        else:
+            ll = corrected_prior_ll
         return ll
 
     @staticmethod
@@ -86,4 +89,6 @@ class PyramidLoss(nn.Module):
 
         print(f'Amount of Log Gates: {SLogGate.log_gate_count}')
         print(f'Amount of Tanh Gates: {TanhGate.tanh_gate_count}')
+        print(f'Amount of Bill Gates: 1')
+
         print_separator()
