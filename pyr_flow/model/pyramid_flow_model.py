@@ -49,10 +49,9 @@ class PyramidFlowModel(LayerModule):
 
             #bau einen eye layer, wo man die diagonale lernen kann. und dann? David?
 
-            if MODEL_TYPE != 2:
-                layer_list.append(DepthConvBundle(total_pixel_depth=total_pixel_depth,
-                                                       internal_pixel_depth=internal_pixel_depth,
-                                                       jump_over_pixels=True))
+            layer_list.append(DepthConvBundle(total_pixel_depth=total_pixel_depth,
+                                               internal_pixel_depth=internal_pixel_depth,
+                                               jump_over_pixels=True))
 
             if MODEL_TYPE == 1:
                 layer_list.append(SLogGate())
@@ -80,10 +79,9 @@ class PyramidFlowModel(LayerModule):
             if total_pixel_depth > 50:
                 pixel_jumper = total_pixel_depth // 2
 
-            if MODEL_TYPE != 2:
-                layer_list.append(DepthConvBundle(total_pixel_depth=total_pixel_depth,
-                                                       internal_pixel_depth=pixel_jumper,
-                                                       jump_over_pixels=True))
+            layer_list.append(DepthConvBundle(total_pixel_depth=total_pixel_depth,
+                                                   internal_pixel_depth=pixel_jumper,
+                                                   jump_over_pixels=True))
 
             if MODEL_TYPE == 1:
                 layer_list.append(SLogGate())

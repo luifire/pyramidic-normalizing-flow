@@ -102,8 +102,8 @@ class DepthConv(LayerModule):
     def print_parameter(self):
         w = self.weights
         dia = w.diag()
-        print(f"{self.name} diag min: {dia.min():.2e} max: {dia.max():.2e} prod: {dia.prod():.2e} "
-              f"avg total {w.mean():.2e} inf min : {dia.abs().min():2e} total min: {w.min():.2e}")
+        print(f"{self.name} #diag min: {dia.min():.2e} max: {dia.max():.2e} prod: {dia.prod():.2e} "
+              f" inf min : {dia.abs().min():2e} #all weights: avg total {w.mean():.2e} total min: {w.min():.2e}")
 
     def get_parameter_count(self):
         dim = self.weights.shape[0]

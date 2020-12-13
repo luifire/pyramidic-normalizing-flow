@@ -1,8 +1,7 @@
 from pyr_flow.constants import *
-from pyr_flow.constants import *
 from pyr_flow.model.pyramid_flow_model import PyramidFlowModel
 from pyr_flow.utils.data_utils import load_dataset
-from pyr_flow.model.computation_layers.pyramid_loss import PyramidLoss
+from pyr_flow.model.pyramid_loss import PyramidLoss
 
 def _print_state(batch_idx, dataset_loader):
     percentage = 100. * batch_idx / len(dataset_loader)

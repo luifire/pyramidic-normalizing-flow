@@ -1,9 +1,8 @@
 import torch.optim as optim
 
 from pyr_flow.model.pyramid_flow_model import PyramidFlowModel
-from pyr_flow.model.computation_layers.pyramid_loss import PyramidLoss
+from pyr_flow.model.pyramid_loss import PyramidLoss
 
-from pyr_flow.constants import *
 from pyr_flow.utils import training_utils, data_utils
 from pyr_flow.training.evaluation import Evaluation
 
@@ -15,8 +14,9 @@ if __name__=='__main__':
 
     # DATA
     train_loader, test_loader = data_utils.load_dataset(TRAIN_DATA_SET)
+    eval_loader, _ = data_utils.load_dataset(DataSet.SVHN)
     # EVALUATION
-    evaluation = Evaluation(test_loader)
+    evaluation = Evaluation(test_loader, eval_loader)
 
     # MODEL
     pyrFlow = PyramidFlowModel()
@@ -51,7 +51,8 @@ if __name__=='__main__':
             optimizer.zero_grad()
 
             pyramid_steps, pyramid_steps_lnorm = pyrFlow(data)
-            use_norm = batch_idx % 100 == 0 # only use norm every x time as the gradient towards the norm is way bigger
+            #use_norm = batch_idx % 100 == 0 # only use norm every x time as the gradient towards the norm is way bigger
+            use_norm = True
             loss, nll, unweighted_lnorm, top_nll = pyramid_loss(pyramid_steps, pyramid_steps_lnorm, use_norm)
 
             loss.backward()
@@ -96,13 +97,17 @@ if __name__=='__main__':
 
 
     for epoch in range(N_EPOCHS):
+        #a, b = evaluation.eval_on_normal_test_set(pyrFlow, pyramid_loss)
+
         last_nll, last_top_nll = train(epoch)
         pyrFlow.print_parameter()
 
-        if (epoch + 1) % EVAL_INTERVAL == 0:
-            eval_loss = evaluation.eval_on_normal_test_set(pyrFlow, pyramid_loss, TOTAL_IMAGE_DIMENSION)
-            name = f'{epoch} - loss - {eval_loss:.5f}'
+        if True or (epoch + 1) % EVAL_INTERVAL == 0:
+            a, b = evaluation.eval_on_normal_test_set(pyrFlow, pyramid_loss)
+            name = f'{epoch} - Test {a} Eval {b}'
         else:
             name = f'{epoch} - loss - {last_nll:.5f} top_nll {last_top_nll:.4f}'
+
+
         torch.save(pyrFlow.state_dict(), f'{TRAIN_STATE_DIR}/{name}.model')
         torch.save(optimizer.state_dict(), f'{TRAIN_STATE_DIR}/{name}.optimizer')

@@ -13,11 +13,11 @@ LEARNING_RATE = 1e-5
 # z.t. 10-5 für GLOW etc.
 WEIGHT_DECAY = 5e-5
 LOG_INTERVAL = 100
-EVAL_INTERVAL = 5 # every epoches
+EVAL_INTERVAL = 3 # every epoches
 MAX_GRAD_NORM = 100
 
 
-MODEL_TYPE = 4
+MODEL_TYPE = 2
 """
 1 - addition and slog gat
 2 - tanh, polynomes
