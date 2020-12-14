@@ -1,3 +1,5 @@
+import torch
+
 from pyr_flow.model.computation_layers.depth_conv_layer import *
 from pyr_flow.model.reshaping.initial_reshaping import merge_patches
 from pyr_flow.model.computation_layers.s_log_gate import SLogGate
@@ -176,8 +178,9 @@ class PyramidFlowModel(LayerModule):
 
     def print_parameter(self):
         print_separator()
-        for layer in self.layer_list:
-            layer.print_parameter()
+        with torch.no_grad():
+            for layer in self.layer_list:
+                layer.print_parameter()
         print_separator()
 
     def get_parameter_count(self):
