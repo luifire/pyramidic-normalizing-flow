@@ -12,8 +12,9 @@ def eval_all(model, loss, dataset_loader):
     nll_list = []
     top_nll_list = []
 
+    top_size = 0
     for batch_idx, (data, target) in enumerate(dataset_loader):
-        if batch_idx * BATCH_SIZE_TEST > 3000:
+        if batch_idx * BATCH_SIZE_TEST > 5000:
             print('terminated before all images were evaluated')
             break
 
@@ -23,12 +24,13 @@ def eval_all(model, loss, dataset_loader):
             data = data.to(DEVICE)
 
             pyramid_steps, pyramid_steps_lnorm = model(data)
+            top_size = pyramid_steps[-1][0].shape[-1]
             _, nll, _, top_nll = loss(pyramid_steps, pyramid_steps_lnorm)
             nll_list.append(nll.detach().cpu())
             top_nll_list.append(top_nll.detach().cpu())
 
     np_nll_list = torch.cat(nll_list).numpy() / BITS_PER_DIM_NORM
-    np_top_list = torch.cat(top_nll_list).numpy() / BITS_PER_DIM_NORM
+    np_top_list = torch.cat(top_nll_list).numpy() / (np.log(2) * top_size)
 
     _print_state(len(dataset_loader), dataset_loader)
 

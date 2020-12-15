@@ -104,7 +104,7 @@ if __name__=='__main__':
         last_nll, last_top_nll = train(epoch)
         pyrFlow.print_parameter()
 
-        if True or (epoch + 1) % EVAL_INTERVAL == 0:
+        if (epoch + 1) % EVAL_INTERVAL == 0:
             a, b = evaluation.eval_on_normal_test_set(pyrFlow, pyramid_loss)
             name = f'{epoch} - Test {a} Eval {b}'
         else:
