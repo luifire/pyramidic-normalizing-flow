@@ -61,6 +61,7 @@ if __name__=='__main__':
 
             optimizer.step()
 
+            #pyrFlow.print_parameter()
             if batch_idx % LOG_INTERVAL == 0:
                 if epoch == 0 and batch_idx == 0:
                     PyramidLoss.print_loss_size(pyramid_steps)
@@ -90,6 +91,7 @@ if __name__=='__main__':
 
                 if torch.isnan(loss).any():
                     exit(2)
+
         return nll.mean().item() / BITS_PER_DIM_NORM, top_nll.mean().item()
                 # TODO check std dev
                 #train_losses.append(loss.item())

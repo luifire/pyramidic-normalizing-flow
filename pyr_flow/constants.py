@@ -17,17 +17,18 @@ EVAL_INTERVAL = 3 # every epoches
 MAX_GRAD_NORM = 100
 
 
-MODEL_TYPE = 2
+MODEL_TYPE = 5
 """
 1 - addition and slog gat
 2 - tanh, polynomes
 3 - leaky relu | hat tatsächlich svhn von cifar getrennt!
 4 - Bent Identity (weil Leaky Relu hat keinen Loss für die Norm berechnen können. Deshalb ging der Loss erstmal hoch!)
-
+5 - More Backward Version
 """
 
 S_LOG_GATE_ALPHA_INIT = 0.1
 
+#if MODEL_TYPE == 5:
 PYRAMID_STEP_WEIGHTING = 1.5 # weighted by 1/2**i
 LAST_PIXEL_BREAK_DOWN = 3 # last pixel consists of N pixels, then our pyramid steps will be /3
 
@@ -49,6 +50,7 @@ torch.manual_seed(RANDOM_SEED)
 
 torch.backends.cudnn.deterministic = True
 torch.set_printoptions(linewidth=130)
+#torch.autograd.set_detect_anomaly(True)
 #torch.set_default_tensor_type(torch.DoubleTensor)
 
 # Data Set
@@ -84,6 +86,10 @@ else:
 
 if CENTER_CROP is not None:
     DATA_WIDTH, DATA_HEIGHT = CENTER_CROP, CENTER_CROP
+
+# Gray Scaling
+if MODEL_TYPE == 5:
+    PIXEL_DEPTH = 1
 
 TOTAL_IMAGE_DIMENSION = DATA_WIDTH * DATA_HEIGHT * PIXEL_DEPTH
 

@@ -6,9 +6,9 @@ from pyr_flow.constants import *
 
 
 class DepthConv(LayerModule):
-
     """  so we ignore all pixels from 1...pixel_idx (pixel 0 was just
     swapped from the bottom and thus needs to be filled) """
+
     def __init__(self, name, total_pixel_depth, internal_pixel_depth, jump_over_pixels, pixel_idx=-1):
         super().__init__()
         self.total_pixel_depth = total_pixel_depth
@@ -16,7 +16,7 @@ class DepthConv(LayerModule):
         self.jump_over_pixels = jump_over_pixels
         self.name = name
 
-        #later init
+        # later init
         self.non_updateable_parameters = None
         self.identity_start = None
         self.identity_end = None
@@ -65,12 +65,12 @@ class DepthConv(LayerModule):
 
         diag = torch.diagonal(weights)
 
-        #logd_det = diag.abs().log().sum()
+        # logd_det = diag.abs().log().sum()
         logd_det = diag.abs().log()
 
         return weights, logd_det
 
-    def forward(self, x : torch.Tensor, lnorm_map):
+    def forward(self, x: torch.Tensor, lnorm_map):
         _, height, width, _ = x.shape
 
         """
@@ -94,7 +94,7 @@ class DepthConv(LayerModule):
         # |det| == |det(Kernel)^amount_of_convolutions|
         # Note that the power part ccan be done like this
         # log(|a^b|) = log(|a|^b) = b log(|a|)
-        #total_logd_det = logd_det * amount_of_convolutions
+        # total_logd_det = logd_det * amount_of_convolutions
 
         lnorm_map += logd_det
         return x, lnorm_map

@@ -7,26 +7,28 @@ from pyr_flow.model.computation_layers.tanh_gate import TanhGate
 from pyr_flow.constants import *
 from pyr_flow.misc.misc import *
 
+
 class PyramidLoss(nn.Module):
 
     def __init__(self, rv_size=-1, k=256):
         super().__init__()
         self.log_k = np.log(k)
-        #self.rv_size = rv_size
+        # self.rv_size = rv_size
         self.prior = dict()
-        #self.discretisation_offset = np.log(self.k) * self.rv_size
+        # self.discretisation_offset = np.log(self.k) * self.rv_size
 
     """ we create the prior dynamically """
+
     def _get_prior(self, size):
         if size not in self.prior:
             self.prior[size] = distributions.MultivariateNormal(torch.zeros(size).to(DEVICE),
-                                                         torch.eye(size).to(DEVICE))
+                                                                torch.eye(size).to(DEVICE))
         return self.prior[size]
 
     def forward(self, pyramid_steps, pyramid_steps_lnorm, use_norm=True):
         loss = torch.zeros(1, device=DEVICE)
-        #unweighted_prior = torch.zeros(1, device=DEVICE)
-        #unweighted_lnorm = torch.zeros(1, device=DEVICE)
+        # unweighted_prior = torch.zeros(1, device=DEVICE)
+        # unweighted_lnorm = torch.zeros(1, device=DEVICE)
         top_nll = None
         batch_size = pyramid_steps[0].shape[0]
         unweighted_loss = torch.ones(batch_size, device=DEVICE)
@@ -46,7 +48,7 @@ class PyramidLoss(nn.Module):
             weight = 1 / PYRAMID_STEP_WEIGHTING ** i
             loss += weight * ll.mean() / step.shape[1]
 
-            unweighted_loss += ll # isotropic Gauss -> we can simply multiply (or add in log Space)
+            unweighted_loss += ll  # isotropic Gauss -> we can simply multiply (or add in log Space)
             unweighted_lnorm += lnorm_step.sum(1)
 
         return -loss, -unweighted_loss, -unweighted_lnorm, top_nll
@@ -78,7 +80,7 @@ class PyramidLoss(nn.Module):
         pyramid_steps = reversed(pyramid_steps)
         size_sum = 0
         for i, step in enumerate(pyramid_steps):
-            step = step[0] # ignore batch
+            step = step[0]  # ignore batch
             step = step.reshape(-1)
             weight = 1 / (PYRAMID_STEP_WEIGHTING ** i)
             size = step.shape[0]
